@@ -1,0 +1,4 @@
+*.pyc
+src/python/strpr.sublime-project
+src/python/strpr.sublime-workspace
+src/python/main.sublime-workspace

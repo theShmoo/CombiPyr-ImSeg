@@ -4,7 +4,7 @@
 
 **David Pfahler**
 
-***Structural Pattern Recognition** 186.836, UE, 2016W*
+***Structural Pattern Recognition*** *186.836, UE, 2016W*
 
 24.11.2016
 

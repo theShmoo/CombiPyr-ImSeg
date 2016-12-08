@@ -17,6 +17,6 @@ switch nargin
     otherwise
         error('Invalid number of arguments');
 end
-checkNeighborhood(neighborhood)
+assertNeighborhood(neighborhood)
 
 end

@@ -1,27 +1,30 @@
-function [ dart_indices ] = getDartIndices( width, height, neighborhood )
+function [ dart_indices ] = getDartIndices( width, height, class_str, neighborhood )
 %COMBINATORIALMAP Create a combinatorial map from an image
 % INPUT:
 %   width ... the with of the image
 %   height ... the height of the image
+%   class ... the data type of the darts indices (default: uint16)
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 % OUTPUT:
 %   dart_indices ... returns the indices darts of the darts of a
-%   combinatorial map. (N, S, E, W)
-% AUTHOR:
-%   David Pfahler
+%       combinatorial map. a struct with the inidices of: (N, S, E, W)
+%COPYRIGHT:
+%   David Pfahler 2016
+%PROJECT:
+%   CombPyr_ImSeg
 
 switch nargin
-    case 3
+    case 4
         % everything is fine
-    case 2
+    case 3
+       class_str = 'uint32';
+    case 2 
+       class_str = 'uint32';
        neighborhood = 4;
     otherwise
         error('Invalid number of arguments');
 end
-
-if neighborhood ~= 4
-    error('Invalid Neighborhood defined');
-end
+assertNeighborhood(neighborhood);
 
 num_ns = (height-1)*width;
 num_ew = height*(width-1);
@@ -59,10 +62,10 @@ changes_E(end-width+2:end) = changes_E(end-width+2:end) - 1;
 changes_W(end-width+2:end) = changes_W(end-width+2:end) - 1;
 changes_W(end-width+2) = changes_W(end-width+2) - 1;
 
-
-dart_indices = cell(neighborhood,1);
-dart_indices{1} = start_n + cumsum([0; changes_N]);
-dart_indices{2} = start_s + cumsum([0; changes_S]);
-dart_indices{3} = start_e + cumsum([0; changes_E]);
-dart_indices{4} = start_w + cumsum([0; changes_W]);
+% create the struct for the indices
+dart_indices = struct;
+dart_indices.N = uint32(start_n + cumsum([0; changes_N]));
+dart_indices.S = uint32(start_s + cumsum([0; changes_S]));
+dart_indices.E = uint32(start_e + cumsum([0; changes_E]));
+dart_indices.W = uint32(start_w + cumsum([0; changes_W]));
 

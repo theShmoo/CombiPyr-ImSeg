@@ -11,7 +11,9 @@ function [survivors] = computeSurvivors( cm, neighborhood )
 %           contains the index of the next dart in the map 
 %       cm.prev column (num_darts x 1 uint32)
 %           contains the index of the previous dart in the map 
-%       cm.num_darts (1 x 1 uint32) 
+%       cm.active (num_active x 1 uint32) 
+%           contains the active darts of this map
+%       cm.num_active (1 x 1 uint32) 
 %           contains the number of darts in the map
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 %OUTPUT:
@@ -31,44 +33,43 @@ switch nargin
 end
 assertNeighborhood(neighborhood)
 
-% logical edge index; 
-% first row is 1 for the darts that will be survivors
-% second row is 1 for darts that can't become survivors (and are therefore
-% skipped)
-l_survivors = false(cm.num_darts,2);
+% logical edge indices
+% survivors is 2 for the darts that will be survivors
+% survivors is 1 for the darts that can't become survivors (and are
+% therefore skipped)
+survivors = uint8(zeros(length(cm.values),1));
                                   
-% Sort edges w.r.t. weight
-[~,idx] = sort(cm.values,1,'descend');
-%sorted_darts = darts(idx,:);
+% Sort the active edges w.r.t. weight
+darts = sortrows([cm.sorted_idx_values(cm.active).',cm.active]);
 
-% now select survivors from the darts
-for dart = idx.'
-    % if the dart is already marked as part of the survivors kick it off
-    if l_survivors(dart,2)
+% now select survivors from the active darts
+for dart = darts(:,2).'
+    
+    % if the dart is already marked as part of the survivors or marked as
+    % invalid kick it off
+    if survivors(dart) > 0
         continue;
     end
-    % get the involution and the next dart of the dart
-    involution = cm.involution(dart);
-    next_dart = cm.next(dart);
     
-    l_survivors(dart,2) = 1;
-    l_survivors(involution,2) = 1;
-
-    while next_dart ~= dart && ~l_survivors(next_dart,1)
-       l_survivors(next_dart,2) = 1;
-       next_dart = cm.next(next_dart);
-    end
-
-    next_involution = cm.next(involution);
-    while next_involution ~= involution && ~l_survivors(next_involution, 1)
-       l_survivors(next_involution, 2) = 1;
-       next_involution = cm.next(next_involution);
-    end
-
-    l_survivors(dart,1) = next_dart == dart && next_involution == involution;
+    % get the orbit of the dart
+    dart_orbit = getOrbit(cm,dart);
+    % get the indices of the darts of the orbits that are untouched
+    surviving_darts = dart_orbit(survivors(dart_orbit)==0);
+    % set all untouched darts to survivors
+    survivors(surviving_darts) = 2;
+    
+    % get the orbit of the involution darts of the new survivors
+    involution = cm.involution(surviving_darts);
+    involution_orbit = getOrbit(cm,involution);
+    % and set all of them to invalid
+    survivors(involution_orbit) = 1;
+    
+    % additionally set the involutions of the involution orbit to invalid!
+    y = setdiff(cm.involution(involution_orbit),surviving_darts);
+    survivors(y) = 1;
 end
 
-survivors = uint32(find(l_survivors(:,1)));
+survivors = uint32(find(survivors == 2));
 end
 
 

@@ -10,7 +10,7 @@ rng('default')
 
 %% image loading
 %image = loadExampleImage(); 
-image = loadTestData(2,1);
+image = loadTestData(2,0);
 
 %% build the combinatorical pyramid
 cp = buildCombinatoricalPyramid(image);

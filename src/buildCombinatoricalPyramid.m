@@ -37,28 +37,28 @@ dart_values = computeDartValues(image,1);
 %% build the combinatorical map from the computed dart values of the image
 cm = combinatorialMap(dart_values, width, height);
 
-%% draw the map
-drawCombinatorialMap(cm, width, height);
-
 %% reduce unencessary first darts
 % keep_ids = cm.values >= 0;
-% cm.num_darts = length(keep_ids);
+% cm.num_active = length(keep_ids);
 % cm.values = uint8(cm.values(keep_ids));
 % cm.involution = cm.involution(keep_ids);
 % cm.next = cm.next(keep_ids);
 % cm.prev = cm.prev(keep_ids);
 
-%% get the surviving indices
-tic;
-surviving_indices = computeSurvivors(cm);
-toc;
+%% build the pyramid
+cp = struct;
+cp.levels = {cm};
+cp.num_elements = cm.num_active;
 
-%% get the next level
-next_level = contractCombinatorialMap(cm, surviving_indices);
-
-
-
-
+while true
+    surviving_darts = computeSurvivors(cp.levels{end});
+    drawActiveDarts(cp.levels{end},surviving_darts);
+    if isempty(surviving_darts)
+        break;
+    end
+    cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, surviving_darts);
+    cp.num_elements(end+1) = length(cp.levels{end}.active);
+end
 
 
 end

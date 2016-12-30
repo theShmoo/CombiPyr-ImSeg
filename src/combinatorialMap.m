@@ -1,7 +1,7 @@
-function [ cm ] = combinatorialMap( dart_values, width, height, neighborhood )
+function [ cm ] = combinatorialMap( darts, width, height, neighborhood )
 %COMBINATORIALMAP Create a combinatorial map from an image
 %INPUT:
-%   dart_values ... the values which the darts. a struct with a dart from
+%   darts ... the values which the darts. a struct with a dart from
 %   every pixel to every neighboring pixel (based on the neighborhood
 %   function)
 %   width ... the width of the image
@@ -11,13 +11,17 @@ function [ cm ] = combinatorialMap( dart_values, width, height, neighborhood )
 %   cm ... returns the combinatorial map: 
 %       cm.values (num_darts x 1 int16)
 %           contains the dart values
+%       cm.sorted_idx_values
+%           the sorted permutation of the values (descending)
 %       cm.involution (num_darts x 1 uint32) 
 %           column the involution dart index 
 %       cm.next column (num_darts x 1 uint32)
 %           contains the index of the next dart in the map 
 %       cm.prev column (num_darts x 1 uint32)
-%           contains the index of the previous dart in the map 
-%       cm.num_darts (1 x 1 uint32) 
+%           contains the index of the previous dart in the map
+%       cm.active (num_active x 1 uint32) 
+%           contains the active darts of this map
+%       cm.num_active (1 x 1 uint32) 
 %           contains the number of darts in the map
 %       
 %COPYRIGHT:
@@ -46,6 +50,8 @@ cm = struct;
 
 % the first column contains the dart values
 cm.values = int16(zeros(num_darts,1));
+cm.x = zeros(num_darts,1);
+cm.y = zeros(num_darts,1);
 
 % the second column the involution dart index so how to come back to this
 % index
@@ -61,16 +67,29 @@ cm.involution = uint32(zeros(num_darts,1));
 cm.prev = uint32(zeros(num_darts,1));
 
 % additional combinatorical map information:
-cm.num_darts = num_darts;
+cm.num_active = num_darts;
+cm.active = uint32(1:num_darts).';
 
 %% get the dart indices of a standard image
 dart_indices = getDartIndices(width,height);
 
 %% first value in edges is the difference
-cm.values(dart_indices.N) = dart_values.N;
-cm.values(dart_indices.S) = dart_values.S;
-cm.values(dart_indices.W) = dart_values.W;
-cm.values(dart_indices.E) = dart_values.E;
+cm.values(dart_indices.N) = darts.N.values;
+cm.values(dart_indices.S) = darts.S.values;
+cm.values(dart_indices.W) = darts.W.values;
+cm.values(dart_indices.E) = darts.E.values;
+cm.x(dart_indices.N) = darts.N.x;
+cm.x(dart_indices.S) = darts.S.x;
+cm.x(dart_indices.W) = darts.W.x;
+cm.x(dart_indices.E) = darts.E.x;
+cm.y(dart_indices.N) = darts.N.y;
+cm.y(dart_indices.S) = darts.S.y;
+cm.y(dart_indices.W) = darts.W.y;
+cm.y(dart_indices.E) = darts.E.y;
+
+% save the sorted permutation
+[~,idx] = sort(cm.values,1,'descend');
+cm.sorted_idx_values = idx.';
 
 %% second value is the involution
 cm.involution(dart_indices.N) = dart_indices.S;

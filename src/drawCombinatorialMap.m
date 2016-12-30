@@ -28,23 +28,13 @@ switch nargin
 end
 assertNeighborhood(neighborhood);
 
-% holds 1 if the dart is already drawn
-already_drawn = false(cm.num_darts,1);
-
 % the coordinates of the pixels
-num_outgoing_darts = zeros(width,height);
-i = 1;
+num_outgoing_darts = zeros(height,width);
 
-for dart = 1:cm.num_darts
-   % if the dart was already drawn ignore it
-   if already_drawn(dart)
-       continue
-   end
-   
+for dart = cm.active.'
    orbit = getOrbit(cm,dart);
-   already_drawn(orbit) = 1;
-   num_outgoing_darts(i) = length(orbit);
-   i = i + 1;
+   involution = cm.involution(dart);
+   num_outgoing_darts(cm.x(involution),cm.y(involution)) = length(orbit);
 end
 
 num_outgoing_darts'

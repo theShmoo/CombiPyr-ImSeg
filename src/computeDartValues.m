@@ -34,7 +34,7 @@ switch nargin
 end
 assertNeighborhood(neighborhood);
 
-% get the width and height of the image
+%% get the width and height of the image
 [width, height] = size(image_grayscale);
 
 if width < 2 || height < 2
@@ -44,18 +44,23 @@ end
 % compute in double to be able to look at negative values
 d_image_grayscale = double(image_grayscale);
 
+%% Get Values
 if get_differences
     % North edges differences
-    N = d_image_grayscale(1:end-1,:)-d_image_grayscale(2:end,:);
+    N = d_image_grayscale(:,1:end-1)-d_image_grayscale(:,2:end);
+    [N_x, N_y] = meshgrid(1:height-1,1:width);
     % South edges differences
-    S = d_image_grayscale(2:end,:)-d_image_grayscale(1:end-1,:);
+    S = d_image_grayscale(:,2:end)-d_image_grayscale(:,1:end-1);
+    [S_x, S_y] = meshgrid(2:height,1:width);
     % West edges differences
-    W = d_image_grayscale(:,1:end-1)-d_image_grayscale(:,2:end);
+    W = d_image_grayscale(1:end-1,:)-d_image_grayscale(2:end,:);
+    [W_x, W_y] = meshgrid(1:height,1:width-1);
     % East edges differences
-    E = d_image_grayscale(:,2:end)-d_image_grayscale(:,1:end-1);
+    E = d_image_grayscale(2:end,:)-d_image_grayscale(1:end-1,:);
+    [E_x, E_y] = meshgrid(1:height,2:width);
     
     % convert to int16
-    % int8 is sadly to small
+    % int8 is sadly too small
     N = int16(N);
     S = int16(S);
     W = int16(W);
@@ -110,6 +115,10 @@ if plot_images
 end
 
 %% save it to the struct
-dart_values = struct('N', N, 'E', E, 'W', W, 'S', S);
+dart_values = struct( ...
+    'N', struct('values', N(:), 'x', N_x, 'y', N_y), ...
+    'E', struct('values', E(:), 'x', E_x, 'y', E_y), ...
+    'W', struct('values', W(:), 'x', W_x, 'y', W_y), ...
+    'S', struct('values', S(:), 'x', S_x, 'y', S_y));
 end
 

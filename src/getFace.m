@@ -1,5 +1,5 @@
-function [orbit] = getOrbit( cm, ids)
-%GETORBIT get the orbit of one index or multiple indices
+function [face] = getFace(cm, dart)
+%GETFACE get all darts of one face of the combinatorial map
 %INPUT:
 %   cm ... the combinatorial map: 
 %       cm.values (num_darts x 1 int16)
@@ -15,21 +15,20 @@ function [orbit] = getOrbit( cm, ids)
 %   ids ... (num_ids x 1 uint32) the indices of which the orbit has to be
 %       obtained 
 %OUTPUT:
-%   orbit ... (num_ids x num_elements) the orbit from the input indices
+%   face ... (num_elements x 1) the face from the input dart
 %COPYRIGHT:
 %   David Pfahler 2016
 %PROJECT:
 %   CombPyr_ImSeg
 
-orbit = ids';
+face = dart;
 % initialize the orbit with only the id of the current dart
-for id = ids'
-    % iterate over the orbit until you find the starting dart and save all
-    % found darts in the orbit
-    next_dart = cm.next(id);
-    while ~any(next_dart==orbit)
-    %while next_dart ~= id
-       orbit(end+1) = next_dart;
-       next_dart = cm.next(next_dart);
-    end
+
+% iterate over the orbit until you find the starting dart and save all
+% found darts in the orbit
+next_dart = cm.next(cm.involution(dart));
+while ~any(next_dart==face)
+%while next_dart ~= dart
+   face(end+1) = next_dart;
+   next_dart = cm.next(cm.involution(next_dart));
 end

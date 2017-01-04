@@ -22,6 +22,8 @@ function [ cm ] = combinatorialMap( darts, width, height, neighborhood )
 %       cm.active (num_active x 1 uint32) 
 %           contains the active darts of this map
 %       cm.num_active (1 x 1 uint32) 
+%           contains the number of active darts in the map
+%       cm.num_darts (1 x 1 uint32)
 %           contains the number of darts in the map
 %       
 %COPYRIGHT:
@@ -52,6 +54,7 @@ cm = struct;
 cm.values = int16(zeros(num_darts,1));
 cm.x = zeros(num_darts,1);
 cm.y = zeros(num_darts,1);
+cm.num_darts = num_darts;
 
 % the second column the involution dart index so how to come back to this
 % index

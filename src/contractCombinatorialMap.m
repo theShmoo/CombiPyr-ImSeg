@@ -10,8 +10,9 @@ function [nl] = contractCombinatorialMap( cm, contract_indices, neighborhood )
 %           contains the index of the next dart in the map 
 %       cm.prev column (num_darts x 1 uint32)
 %           contains the index of the previous dart in the map 
-%       cm.num_darts (1 x 1 uint32) 
-%           contains the number of darts in the map
+%       cm.num_active (1 x 1 uint32) 
+%           contains the number of active darts in the map
+%       cm.active (num_active x 1) the active darts in the map
 %   contract_indices ... (n x 1) the indices that get contracted
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 %OUTPUT:
@@ -41,59 +42,61 @@ nl = cm;
 nl.active = setdiff(nl.active, [contract_indices; contract_involution]);
 nl.num_active = length(nl.active);
 
-% contract
+% Contract the contraction kernels at the time
+
 for i = 1:length(contract_indices)
     dart = contract_indices(i);
-    involution = contract_involution(i);
-    
+    inv_dart = contract_involution(i);
     next_dart = nl.next(dart);
-    next_inv = nl.next(involution);
+    next_inv = nl.next(inv_dart);
     prev_dart = nl.prev(dart);
-    prev_inv = nl.prev(involution);
-    
-    % todo: check for self loop or pending edge
-    
+    prev_inv = nl.prev(inv_dart);
+
     % contracting:
     nl.next(prev_dart) = next_inv;
     nl.next(prev_inv) = next_dart;
     % set the previous dart.
     nl.prev(next_dart) = prev_inv;
-        
-    % remove the next dart from the orbit
-    if nl.prev(nl.involution(nl.prev(nl.involution(prev_dart)))) == involution
-        inv_prev_dart = nl.involution(prev_dart);
-        nl.next(nl.prev(prev_dart)) = nl.next(prev_dart);
-        nl.next(nl.prev(inv_prev_dart)) = nl.next(prev_inv);
-        % set the previous dart.
-        nl.prev(prev_dart) = inv_prev_dart;
+end
+
+
+faceSpec= 'Face with %d darts = (';
+
+% check the number of indices for every face of the active darts
+visited = false(nl.num_darts,1);
+removed_darts = [];
+for dart = nl.active.'
+    if visited(dart)
+        continue;
     end
-    if nl.next(nl.involution(nl.next(nl.involution(next_dart)))) == involution
-        inv_next_dart = nl.involution(next_dart);
-        nl.next(nl.prev(next_dart)) = nl.next(next_dart);
-        nl.next(nl.prev(inv_next_dart)) = nl.next(prev_inv);
-        % set the previous dart.
-        nl.prev(next_dart) = inv_next_dart;
+    face = getFace(nl,dart).';
+    inv_face = nl.involution(face);
+    visited(face) = 1;
+    visited(inv_face) = 1;
+    % logging
+    fprintf(faceSpec,length(face));
+    fprintf('%d, ',face);
+    fprintf(')\n');
+    % /logging
+    if length(face) < 3
+        %remove the darts of the face!
+        for i = 1:length(face)
+            face_dart = face(i);
+            inv_dart = inv_face(i);
+            next_dart = nl.next(face_dart);
+            prev_dart = nl.prev(face_dart);
+            nl.next(prev_dart) = next_dart;
+            nl.next(nl.prev(inv_dart)) = nl.next(inv_dart);
+            % set the previous dart.
+            nl.prev(next_dart) = prev_dart;
+        end
+        removed_darts = [removed_darts; face; inv_face];
     end
 end
-% remove duplicates
 
-% for dart = contract_involution.'
-%     % iterate over the orbit until you find the starting dart and save all
-%     % found darts in the orbit
-%     orbit = dart;
-%     next_dart = next_level.next(dart);
-%     while next_dart ~= dart
-%        if(any(next_dart==orbit))
-%            % remove the next dart from the orbit
-%            involution_next_dart = next_level.involution(next_dart);
-%            next_level.next(next_level.prev(next_dart)) = next_level.next(next_dart);
-%            next_level.next(next_level.prev(involution_next_dart)) = next_level.next(involution_next_dart);
-%        else
-%            orbit(end+1) = next_dart;
-%        end
-%        next_dart = next_level.next(next_dart);
-%     end
-% end
+% create the new active darts:
+nl.active = setdiff(nl.active, removed_darts);
+nl.num_active = length(nl.active);
 
 % change the x,y positions of the next level (debug)
 for dart = contract_involution.'

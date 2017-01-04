@@ -1,5 +1,6 @@
 function drawActiveDarts( cm, marked_darts, neighborhood )
-%COMBINATORIALMAP draws an image from a combinatorial map
+%DRAWACTIVEDARTS draws the combinatorial map with all darts and labels them
+%with the id of the dart
 % INPUT:
 %   cm ... the combinatorial map: 
 %       cm.values (num_darts x 1 int16)
@@ -12,6 +13,8 @@ function drawActiveDarts( cm, marked_darts, neighborhood )
 %           contains the index of the previous dart in the map 
 %       cm.num_darts (1 x 1 uint32) 
 %           contains the number of darts in the map
+%   marked_darts ... (n x 1 int16) 
+%           darts thate are a subset of cm.active that will be marked red
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 % AUTHOR:
 %   David Pfahler´

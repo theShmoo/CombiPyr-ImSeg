@@ -49,10 +49,10 @@ cm = combinatorialMap(dart_values, width, height);
 cp = struct;
 cp.levels = {cm};
 cp.num_elements = cm.num_active;
-level = 1;
+cp.levels{end}.level = 1;
 while true
     % logging
-    fprintf('\nPyramid level %d:\n',level);
+    fprintf('\nPyramid level %d:\n',cp.levels{end}.level);
     % /logging
     surviving_darts = computeSurvivors(cp.levels{end});
     drawActiveDarts(cp.levels{end},surviving_darts);
@@ -61,7 +61,6 @@ while true
     end
     cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, surviving_darts);
     cp.num_elements(end+1) = length(cp.levels{end}.active);
-    level = level + 1;
 end
 
 

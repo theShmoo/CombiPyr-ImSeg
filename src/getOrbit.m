@@ -27,8 +27,8 @@ for id = ids'
     % iterate over the orbit until you find the starting dart and save all
     % found darts in the orbit
     next_dart = cm.next(id);
-    while ~any(next_dart==orbit)
-    %while next_dart ~= id
+    %while ~any(next_dart==orbit)
+    while next_dart ~= id
        orbit(end+1) = next_dart;
        next_dart = cm.next(next_dart);
     end

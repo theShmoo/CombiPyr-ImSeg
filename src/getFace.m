@@ -27,8 +27,8 @@ face = dart;
 % iterate over the orbit until you find the starting dart and save all
 % found darts in the orbit
 next_dart = cm.next(cm.involution(dart));
-while ~any(next_dart==face)
-%while next_dart ~= dart
+%while ~any(next_dart==face)
+while next_dart ~= dart
    face(end+1) = next_dart;
    next_dart = cm.next(cm.involution(next_dart));
 end

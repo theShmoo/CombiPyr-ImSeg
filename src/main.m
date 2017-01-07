@@ -4,7 +4,8 @@
 %   CombPyr_ImSeg
 
 %% reset
-clear all;
+clc;
+clearvars;
 close all;
 rng('default')
 
@@ -14,3 +15,7 @@ image = loadTestData(2,0);
 %% build the combinatorical pyramid
 cp = buildCombinatoricalPyramid(image);
 
+%% draw the image for every layer
+for level = cp.levels
+   drawImageForPyramidLevel(image, level);
+end

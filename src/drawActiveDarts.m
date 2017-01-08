@@ -1,4 +1,4 @@
-function drawActiveDarts( cm, marked_darts, neighborhood )
+function [h] = drawActiveDarts( cm, marked_darts, neighborhood )
 %DRAWACTIVEDARTS draws the combinatorial map with all darts and labels them
 %with the id of the dart
 % INPUT:
@@ -32,7 +32,8 @@ function drawActiveDarts( cm, marked_darts, neighborhood )
     end
     assertNeighborhood(neighborhood);
 
-    figure;
+    h = figure;
+    
     hold on;
     plot_darts(cm.active, 1, 0);
     if ~isempty(marked_darts)

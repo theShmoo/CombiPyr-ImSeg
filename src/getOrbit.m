@@ -27,9 +27,12 @@ for id = ids'
     % iterate over the orbit until you find the starting dart and save all
     % found darts in the orbit
     next_dart = cm.next(id);
+    %assert(any(next_dart==cm.active),'access to not active dart'); 
     %while ~any(next_dart==orbit)
     while next_dart ~= id
+       assert(~any(next_dart==orbit),['loop insinde getOrbit with orbit: ',num2str(orbit), ' and dart ', num2str(next_dart)]);
        orbit(end+1) = next_dart;
        next_dart = cm.next(next_dart);
+       assert(any(next_dart==cm.active),['access to not active dart ',num2str(next_dart)]);
     end
 end

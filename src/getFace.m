@@ -22,13 +22,15 @@ function [face] = getFace(cm, dart)
 %   CombPyr_ImSeg
 
 face = dart;
-% initialize the orbit with only the id of the current dart
+% initialize the face with only the id of the current dart
 
-% iterate over the orbit until you find the starting dart and save all
-% found darts in the orbit
+% iterate over the face until you find the starting dart and save all
+% found darts in the face
 next_dart = cm.next(cm.involution(dart));
 %while ~any(next_dart==face)
-while next_dart ~= dart
+while next_dart ~= dart 
+   assert(~any(next_dart==face),['loop insinde getFace with face: ',num2str(face), ' and dart ', num2str(next_dart)]);
    face(end+1) = next_dart;
-   next_dart = cm.next(cm.involution(next_dart));
+   next_dart = cm.next(cm.involution(next_dart));   
+   assert(any(next_dart==cm.active),['access to not active dart',num2str(next_dart)]);
 end

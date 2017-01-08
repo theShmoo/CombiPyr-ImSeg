@@ -28,10 +28,10 @@ assertNeighborhood(neighborhood)
 survivors = uint8(zeros(length(cm.values), 1));
                                   
 % Sort the active edges w.r.t. weight
-darts = sortrows([cm.sorted_idx_values(cm.active).', cm.active]);
-
+[~,idx] = sort(abs(cm.values(cm.active)),1,'ascend');
+darts = cm.active(idx);
 % now select survivors from the active darts
-for dart = darts(:,2).'
+for dart = darts.'
     
     % if the dart is already marked as part of the survivors or marked as
     % invalid kick it off
@@ -43,25 +43,30 @@ for dart = darts(:,2).'
     %surviving_darts = dart_orbit(survivors(dart_orbit)==0);
     % set all untouched darts to survivors
     %survivors(surviving_darts) = 2;
-    survivors(dart) = 2;
+    
     
     % get the orbit of the dart
     dart_orbit = getOrbit(cm,dart);
-    % set the involution of the orbit to invalid
+    % get the involution of the orbit (all darts that count away)
     dart_orbit_inv = cm.involution(dart_orbit);
-    assert(all(survivors(dart_orbit_inv) ~= 2),'contraction kernel creation error!');
-    survivors(dart_orbit_inv) = 1;
-    
-    % get the orbit of the involution dart of the new survivor
+    % get the orbit of the involution of the new survivor
     involution_orbit = getOrbit(cm, cm.involution(dart));
-    assert(all(survivors(involution_orbit) ~= 2),'contraction kernel creation error!');
+    
+    % get the involutions of the involution orbit: (the original dart is in this set)
+    involution_orbit_inv = cm.involution(involution_orbit);
+    
     % and set all of them to invalid
     survivors(involution_orbit) = 1;
+    survivors(involution_orbit_inv) = 1;
+    survivors(dart_orbit_inv) = 1;
     
-    % additionally set the involutions of the involution orbit to invalid!
-    y = setdiff(cm.involution(involution_orbit), dart);
-    assert(all(survivors(y) ~= 2),'contraction kernel creation error!');
-    survivors(y) = 1;
+    %check for self loop
+    if isequal(sort(dart_orbit), sort(involution_orbit))
+        disp(['Contract: self loop detected: ', num2str(dart_orbit)]);
+    else
+        % but set the dart valid!
+        survivors(dart) = 2;
+    end
 end
 
 survivors = uint32(find(survivors == 2));

@@ -18,6 +18,9 @@ switch nargin
 end
 assertNeighborhood(neighborhood)
 DEBUG_FACES = 1;
+REMOVE_SELF_LOOPS = 0;
+REMOVE_SELF_DIRECT_LOOPS = 1;
+REMOVE_PENDING_EDGES = 1;
 
 %% contract all surviving darts
 
@@ -25,12 +28,12 @@ faceSpec = 'Face with %d darts = (';
 
 % check the number of indices for every face of the active darts
 visited = false(nl.num_darts,1);
-for dart = nl.active.'
-    if visited(dart)
+for face_dart = nl.active.'
+    if visited(face_dart)
         continue;
     end
     
-    face = getFace(nl,dart).';
+    face = getFace(nl,face_dart).';
     % every dart in this face is marked as visited (so we don't need to
     % compute it again!)
     visited(face) = 1;
@@ -41,89 +44,99 @@ for dart = nl.active.'
         fprintf(')\n');
     end
     
-    if length(face) == 2
-        inv_face = nl.involution(face);
-        %remove the darts of the face!
-        for i = 1:length(face)
-            face_dart = face(i);
-            inv_dart = inv_face(i);
-            removeDart(face_dart, inv_dart);
-        end
-        
-        %in this case the involution face is visited because the dart is
-        %removed
-        visited(inv_face) = 1; 
-        
-    elseif length(face) == 1
-        disp('self-direct-loop while removing!');
-        
-        inv_dart = nl.involution(face);
-        n_dart = nl.next(face);
-        n_inv = nl.next(inv_dart);
-        p_dart = nl.prev(face);
-        p_inv = nl.prev(inv_dart);
-        
-        hexle = [dart; inv_dart; n_dart; p_dart; p_inv];
-        for h = 1:length(hexle)
-            assert(any(hexle(h)==nl.active),['access to not active dart ',num2str(hexle(h))]);
-        end
-        
-        assert(face == n_inv, 'otherwise the face needs more darts');
-        
-        nl.next(p_dart) = n_dart;
-
-        nl.active(nl.active == face) = [];
+    if length(face) < 3
+        %remove only the first dart of the face!
+        dart = face(1);
+        removeDart(dart);
     end
 end
 
 % create the new active darts:
 nl.num_active = length(nl.active);
 
-function [] = removeDart(dart, inv_dart)
+function [] = removeDart(dart)
 
+    inv_dart = nl.involution(dart);
     next_dart = nl.next(dart);
     next_inv = nl.next(inv_dart);
     prev_dart = nl.prev(dart);
     prev_inv = nl.prev(inv_dart);
-    remove_from_active = [];
+    remove_from_active = []; %#ok<*NASGU>
     hexle = [dart; inv_dart; next_dart; prev_dart; prev_inv];
     for h = 1:length(hexle)
         assert(any(hexle(h)==nl.active),['access to not active dart ',num2str(hexle(h))]);
     end
-    % but only if not bridge, pending edge or self direct loop 
-    if next_inv == inv_dart
-        % pending edge
-        fprintf('Pending edge %d while removing! (-d = %d)\n', dart, inv_dart );
-        % nl.next(prev_dart) = next_dart;
-        % set the previous darts.
-        % nl.prev(next_dart) = prev_dart;
+    
+    o = sort(getOrbit(nl, dart));
+    i_o = sort(getOrbit(nl, inv_dart));
+    if isequal(o, i_o)
+        % self loop! -> don't delete! this is important :D
+        disp(['Remove: self loop detected: ', num2str(o)]);
         
-        % remove_from_active = [dart; inv_dart];
-    elseif next_dart == dart
-        % pending edge
-        fprintf('Strange Pending edge %d while removing! (-d = %d)\n', dart, inv_dart );
+        if REMOVE_SELF_LOOPS
+            nl.next(prev_dart) = next_dart;
+            nl.next(prev_inv) = next_inv;
+            % set the previous darts.
+            nl.prev(next_dart) = prev_dart;      
+            nl.prev(next_inv) = prev_inv;
+
+            remove_from_active = [dart; inv_dart];
+        end
+    % pending edge 1
+    elseif next_inv == inv_dart
+        fprintf('Remove: Pending edge %d (-d = %d)\n', dart, inv_dart );
+        if REMOVE_PENDING_EDGES
+            nl.next(prev_dart) = next_dart;
+            % set the previous darts.
+            nl.prev(next_dart) = prev_dart;
+            remove_from_active = [dart; inv_dart];
+        end
+
+    % pending edge 2
+    elseif next_dart == dart    
+        fprintf('Remove: Pending edge case 2 %d (-d = %d)\n', dart, inv_dart );
+        if REMOVE_PENDING_EDGES
+            nl.next(prev_inv) = next_inv;
+             % set the previous darts.
+            nl.prev(next_inv) = prev_inv;
+            remove_from_active = [dart; inv_dart];
+        end
+
+    % self-direct-loop 1
     elseif next_dart == inv_dart
-        % self-direct-loop
-        % disp('self-direct-loop while removing!');
-        fprintf('self-direct-loop %d while removing! (-d = %d)\n', dart, inv_dart );
-        % nl.next(prev_dart) = next_inv;
-        % set the previous darts.
-        % nl.prev(next_dart) = prev_dart;      
-        % nl.prev(next_inv) = prev_inv;
-    % else a self loop can be treated as regular removal!
+
+        fprintf('Remove: self-direct-loop %d (-d = %d)\n', dart, inv_dart);
+        if REMOVE_SELF_DIRECT_LOOPS
+            nl.next(prev_dart) = next_inv;
+            
+            remove_from_active = dart;
+        end
+        
+    % self-direct-loop 2
+    elseif next_inv == dart
+        
+        fprintf('Remove: self-direct-loop case 2 %d (-d = %d)\n', dart, inv_dart);
+        if REMOVE_SELF_DIRECT_LOOPS
+            nl.next(prev_inv) = next_dart;
+            
+            remove_from_active = dart;
+        end
     else
         nl.next(prev_dart) = next_dart;
         nl.next(prev_inv) = next_inv;
         % set the previous darts.
         nl.prev(next_dart) = prev_dart;      
         nl.prev(next_inv) = prev_inv; 
-        
-        
-        fprintf('Removed %d with -d = %d\n', dart, inv_dart);
-        
+
+
+        fprintf('Remove: %d with -d = %d\n', dart, inv_dart);
+
         remove_from_active = [dart; inv_dart];
     end
     
+    %in this case the involution face is visited because the dart is
+    %removed
+    visited(remove_from_active) = 1;
     nl.active = setdiff(nl.active,remove_from_active);
 end
 

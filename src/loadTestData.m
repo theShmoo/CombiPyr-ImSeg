@@ -45,6 +45,8 @@ switch test_data_id
         test_data = imread('cameraman.tif');
     case 5
         test_data = randi(255,9,9);
+    case 6
+        test_data = randi(255,20,20);
     otherwise
         error('invalid test data id');
 end

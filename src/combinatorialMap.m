@@ -90,10 +90,6 @@ cm.y(dart_indices.S) = darts.S.y;
 cm.y(dart_indices.W) = darts.W.y;
 cm.y(dart_indices.E) = darts.E.y;
 
-% save the sorted permutation
-[~,idx] = sort(cm.values,1,'descend');
-cm.sorted_idx_values = idx.';
-
 %% second value is the involution
 cm.involution(dart_indices.N) = dart_indices.S;
 cm.involution(dart_indices.S) = dart_indices.N;

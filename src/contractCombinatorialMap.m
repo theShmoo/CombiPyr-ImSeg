@@ -70,9 +70,13 @@ end
         end
         
         remove_from_active = [];
-        
+        o = sort(getOrbit(nl, dart));
+        i_o = sort(getOrbit(nl ,inv_dart));
+        if isequal(o, i_o)
+        % self loop! -> don't delete! this is important :D
+            disp(['Contract: self loop detected: ', num2str(o)]);
         % pending edge 1
-        if next_inv == inv_dart
+        elseif next_inv == inv_dart
             fprintf('Contract: Pending edge %d (-d = %d)\n', dart, inv_dart );
             
             nl.next(prev_dart) = next_dart;
@@ -94,14 +98,9 @@ end
             
             fprintf('Contract: self-direct-loop %d (-d = %d)\n', dart, inv_dart);
             nl.next(prev_dart) = next_inv;
-            
+
             remove_from_active = dart;
             
-       % self-loop
-%      elseif isequal(sort(getOrbit(nl, dart)), sort(getOrbit(nl, inv_dart)))
-%             
-%          fprintf('self-loop %d while contracting! (-d = %d)\n', dart, inv_dart);
-
         % self-direct-loop 2
         elseif next_inv == dart
             
@@ -109,7 +108,6 @@ end
             nl.next(prev_inv) = next_dart;
             
             remove_from_active = dart;
-            
         % normal contracting:
         else
             nl.next(prev_dart) = next_inv;

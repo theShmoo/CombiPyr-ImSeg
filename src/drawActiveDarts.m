@@ -35,13 +35,13 @@ function [h] = drawActiveDarts( cm, marked_darts, neighborhood )
     h = figure;
     
     hold on;
-    plot_darts(cm.active, 1, 0);
+    plot_darts(cm.active, 0);
     if ~isempty(marked_darts)
-        plot_darts(marked_darts, 1, 1);
+        plot_darts(marked_darts, 1);
     end
     hold off;
     
-    function plot_darts(darts, plot_text, emph_darts)
+    function plot_darts(darts, emph_darts)
         inv_darts = cm.involution(darts);
         y = cm.y(inv_darts);
         x = cm.x(inv_darts);
@@ -62,15 +62,13 @@ function [h] = drawActiveDarts( cm, marked_darts, neighborhood )
             'MaxHeadSize',0.1, ...
             'MarkerSize',10);
 
-        if plot_text
-            % text plotting:
-            x_text = x + vec_x*3/4;
-            y_text = y + vec_y*3/4;
-            txt = cellstr(num2str(darts));
-            t = text(x_text,y_text,txt);
-            set(t,'Color',text_color);
-            set(gca,'ytick',0:max(y+vec_y));
-            set(gca,'xtick',0:max(x+vec_x));
-        end
+        % text plotting:
+        x_text = x + vec_x*3/4;
+        y_text = y + vec_y*3/4;
+        txt = cellstr(num2str(darts));
+        t = text(x_text,y_text,txt);
+        set(t,'Color',text_color);
+        set(gca,'ytick',0:max(y+vec_y));
+        set(gca,'xtick',0:max(x+vec_x));
     end
 end

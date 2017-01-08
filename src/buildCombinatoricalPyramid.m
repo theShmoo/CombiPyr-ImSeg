@@ -50,8 +50,9 @@ while true
     
     contraction_darts = computeContractionDarts(cp.levels{end});
     drawActiveDarts(cp.levels{end},contraction_darts);
+    title(['level ',num2str(cp.levels{end}.level)]);
     cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, contraction_darts);
-    drawActiveDarts(cp.levels{end});
+    % drawActiveDarts(cp.levels{end});
     cp.levels{end} = contractionSimplification(cp.levels{end});
     % drawActiveDarts(cp.levels{end});
     
@@ -60,6 +61,9 @@ while true
         break;
     end
 end
+
+drawActiveDarts(cp.levels{end});
+title('last level');
 
 
 end

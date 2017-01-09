@@ -34,31 +34,33 @@ def printCombination():
             s += '%s, ' % out.dart_id
         s += str(all_out[-1].dart_id)
         s += ")\n"
-
     print(s)
 
 
-def printInvariants(direction):
-    s = "Invariants: \n"
+def printInvolutions(direction):
+    s = "Involutions: \n"
     for dart in map.darts:
         if dart.direction is direction:
-            invariant = dart.getInvariant()
+            inv = dart.getInvolution()
             s += '%d %d (%s)\n' % (dart.dart_id,
-                                   invariant.dart_id, invariant.direction)
+                                   inv.dart_id, inv.direction)
     print(s)
+
+
 # init here
 map = CombinatorialMap()
-w = 19
-h = 14
+w = 3
+h = 3
 map.setSize(w, h)
-# map.printNodes()
-# map.printNextDarts()
+map.printNodes()
+map.printNextDarts()
+
 # printCombination()
-printDirection("all")
+# printDirection("all")
 # printDirection("E")
 # printDirection("W")
 # printDirection("S")
-# printInvariants("E");
-# printInvariants("W");
+# printInvolutions("E");
+# printInvolutions("W");
 # map.printDarts()
 # map.printNextDarts()

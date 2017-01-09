@@ -32,7 +32,7 @@ assertNeighborhood(neighborhood);
 num_outgoing_darts = zeros(height,width);
 
 for dart = cm.active.'
-   orbit = getOrbit(cm,dart);
+   orbit = getOrbit(cm, dart, 0);
    involution = cm.involution(dart);
    num_outgoing_darts(cm.x(involution),cm.y(involution)) = length(orbit);
 end

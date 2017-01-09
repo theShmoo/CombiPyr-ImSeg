@@ -47,6 +47,12 @@ switch test_data_id
         test_data = randi(255,9,9);
     case 6
         test_data = randi(255,20,20);
+    case 7
+        test_data = randi(255,100,100);
+    case 8
+        test_data = imread('eight.tif');
+    case 9
+        test_data = checkerboard(4,2,1) * 255;
     otherwise
         error('invalid test data id');
 end

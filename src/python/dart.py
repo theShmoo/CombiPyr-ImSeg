@@ -15,12 +15,12 @@ class Dart(object):
         self.to_node = None
         self.next = None
 
-    def getInvariant(self):
+    def getInvolution(self):
         assert self.to_node is not None
         opp_dir = direction.getOppositeDirection(self.direction)
-        invariant = self.to_node.getOut(opp_dir)
-        assert invariant is not None
-        return invariant
+        involution = self.to_node.getOut(opp_dir)
+        assert involution is not None
+        return involution
 
     def setFrom(self, node):
         assert self.from_node is None

@@ -1,4 +1,4 @@
-function [ cp ] = buildCombinatoricalPyramid( image, neighborhood )
+function [ cp ] = buildCombinatoricalPyramid( image, DEBUG, neighborhood )
 %BUILDCOMBINATORICALPYRAMID buids a combinatorical pyramid from the input
 %image
 %INPUT:
@@ -16,10 +16,13 @@ function [ cp ] = buildCombinatoricalPyramid( image, neighborhood )
 
 % check number of input arguments and set default values
 switch nargin
-    case 2
+    case 3
         % everything is fine
+    case 2 
+        neighborhood = 4;
     case 1
         neighborhood = 4;
+        DEBUG = 0;
     case 0
         neighborhood = 4;
         image = loadExampleImage();
@@ -32,10 +35,14 @@ assertNeighborhood(neighborhood);
 [width, height] = size(image);
 
 %% compute the dart values of the graph
+tic
 dart_values = computeDartValues(image,1);
+disp(['Computed dart values in t = ',num2str(toc)]);
 
 %% build the combinatorical map from the computed dart values of the image
+tic
 cm = combinatorialMap(dart_values, width, height);
+disp(['Build the first level in t = ',num2str(toc)]);
 
 %% build the pyramid
 cp = struct;
@@ -48,16 +55,27 @@ while true
     fprintf('\nPyramid level %d:\n',cp.levels{end}.level);
     % /logging
     
-    contraction_darts = computeContractionDarts(cp.levels{end});
-    drawActiveDarts(cp.levels{end},contraction_darts);
-    title(['level ',num2str(cp.levels{end}.level)]);
-    cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, contraction_darts);
-    % drawActiveDarts(cp.levels{end});
-    cp.levels{end} = contractionSimplification(cp.levels{end});
-    % drawActiveDarts(cp.levels{end});
+    tic
+    contraction_darts = computeContractionDarts(cp.levels{end},DEBUG);
+    disp(['Computing contraction darts in t = ',num2str(toc)]);
+    
+    if DEBUG
+        drawActiveDarts(cp.levels{end},contraction_darts); 
+        title(['level ',num2str(cp.levels{end}.level)]);
+    end;
+    
+    tic
+    cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, contraction_darts, DEBUG);
+    disp(['Contracting darts in t = ',num2str(toc)]);
+    
+    tic
+    cp.levels{end} = contractionSimplification(cp.levels{end}, DEBUG);
+    disp(['Simplify darts in t = ',num2str(toc)]);
     
     cp.num_elements(end+1) = length(cp.levels{end}.active);
-    if cp.num_elements(end) == cp.num_elements(end-1) || cp.num_elements(end) == 0
+    if cp.num_elements(end) == 0
+       error('contracted and removed too much');
+    elseif cp.num_elements(end) == cp.num_elements(end-1) || isempty(contraction_darts)
         break;
     end
 end

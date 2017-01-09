@@ -1,4 +1,4 @@
-function [face] = getFace(cm, dart)
+function [face] = getFace(cm, dart, DEBUG)
 %GETFACE get all darts of one face of the combinatorial map
 %INPUT:
 %   cm ... the combinatorial map: 
@@ -29,8 +29,8 @@ face = dart;
 next_dart = cm.next(cm.involution(dart));
 %while ~any(next_dart==face)
 while next_dart ~= dart 
-   assert(~any(next_dart==face),['loop insinde getFace with face: ',num2str(face), ' and dart ', num2str(next_dart)]);
+   if DEBUG; assert(~any(next_dart==face),['loop insinde getFace with face: ',num2str(face), ' and dart ', num2str(next_dart)]); end;
    face(end+1) = next_dart;
    next_dart = cm.next(cm.involution(next_dart));   
-   assert(any(next_dart==cm.active),['access to not active dart',num2str(next_dart)]);
+   if DEBUG; assert(any(next_dart==cm.active),['access to not active dart',num2str(next_dart)]); end;
 end

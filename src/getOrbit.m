@@ -1,4 +1,4 @@
-function [orbit] = getOrbit( cm, ids)
+function [orbit] = getOrbit( cm, ids, DEBUG)
 %GETORBIT get the orbit of one index or multiple indices
 %INPUT:
 %   cm ... the combinatorial map: 
@@ -30,9 +30,9 @@ for id = ids'
     %assert(any(next_dart==cm.active),'access to not active dart'); 
     %while ~any(next_dart==orbit)
     while next_dart ~= id
-       assert(~any(next_dart==orbit),['loop insinde getOrbit with orbit: ',num2str(orbit), ' and dart ', num2str(next_dart)]);
+       if DEBUG; assert(~any(next_dart==orbit),['loop insinde getOrbit with orbit: ',num2str(orbit), ' and dart ', num2str(next_dart)]); end;
        orbit(end+1) = next_dart;
        next_dart = cm.next(next_dart);
-       assert(any(next_dart==cm.active),['access to not active dart ',num2str(next_dart)]);
+       if DEBUG; assert(any(next_dart==cm.active),['access to not active dart ',num2str(next_dart)]); end;
     end
 end

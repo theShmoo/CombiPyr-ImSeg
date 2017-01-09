@@ -10,12 +10,7 @@ close all;
 rng('default')
 
 %% image loading
-image = loadTestData(3,0);
+image = loadTestData(9,1);
 
 %% build the combinatorical pyramid
-cp = buildCombinatoricalPyramid(image);
-
-%% draw the image for every layer
-for level = cp.levels
-   drawImageForPyramidLevel(image, level);
-end
+cp = buildCombinatoricalPyramid(image, 1);

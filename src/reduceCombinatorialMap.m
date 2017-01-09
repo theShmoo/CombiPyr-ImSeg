@@ -71,7 +71,7 @@ nl.num_active = length(nl.active);
 % change the x,y positions of the next level (debug)
 contract_involution = nl.involution(contracted_darts);
 for dart = contract_involution.'
-    dart_orbit = cm.involution(getOrbit(cm,dart));
+    dart_orbit = cm.involution(getOrbit(cm, dart, 0));
     nl.x(dart_orbit) = cm.x(dart);
     nl.y(dart_orbit) = cm.y(dart);
 end

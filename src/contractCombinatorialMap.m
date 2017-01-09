@@ -1,4 +1,4 @@
-function [nl] = contractCombinatorialMap( cm, contract_indices, neighborhood )
+function [nl] = contractCombinatorialMap( cm, contract_indices, DEBUG, neighborhood )
 %contractCombinatorialMap contracts all edges in the combinatorial map
 %INPUT:
 %   cm ... the combinatorial map:
@@ -21,10 +21,13 @@ function [nl] = contractCombinatorialMap( cm, contract_indices, neighborhood )
 %   David Pfahler
 
 switch nargin
-    case 3
+    case 4
         % everything is fine
+    case 3
+        neighborhood = 4;
     case 2
-       neighborhood = 4;
+        DEBUG = 0;
+        neighborhood = 4;
     otherwise
         error('Invalid number of arguments');
 end
@@ -52,29 +55,33 @@ nl.level = cm.level + 1;
 
 real_contracted = setdiff(contract_involution, nl.active);
 
-% change the x,y positions of the next level (debug)
-for dart = real_contracted.'
-    dart_orbit = cm.involution(getOrbit(cm,dart));
-    nl.x(dart_orbit) = cm.x(dart);
-    nl.y(dart_orbit) = cm.y(dart);
-end
+%if DEBUG
+    % change the x,y positions of the next level (debug)
+    for dart = real_contracted.'
+        dart_orbit = cm.involution(getOrbit(cm,dart,DEBUG));
+        nl.x(dart_orbit) = cm.x(dart);
+        nl.y(dart_orbit) = cm.y(dart);
+    end
+%end
 
     function [] = contractDart(dart,inv_dart)        
         next_dart = nl.next(dart);
         next_inv = nl.next(inv_dart);
         prev_dart = nl.prev(dart);
         prev_inv = nl.prev(inv_dart);
-        hexle = [dart; inv_dart; next_dart; prev_dart; prev_inv];
+        
+        if DEBUG
+        hexle = [dart; inv_dart; next_dart; next_inv; prev_dart; prev_inv];
         for h = 1:length(hexle)
             assert(any(hexle(h)==nl.active),['access to not active dart ',num2str(hexle(h))]);
         end
         
-        remove_from_active = [];
-        o = sort(getOrbit(nl, dart));
-        i_o = sort(getOrbit(nl ,inv_dart));
+        remove_from_active = []; %#ok<*NASGU>
+        o = sort(getOrbit(nl, dart, DEBUG));
+        i_o = sort(getOrbit(nl, inv_dart, DEBUG));
         if isequal(o, i_o)
         % self loop! -> don't delete! this is important :D
-            disp(['Contract: self loop detected: ', num2str(o)]);
+            error(['Contract: self loop detected: ', num2str(o)]);
         % pending edge 1
         elseif next_inv == inv_dart
             fprintf('Contract: Pending edge %d (-d = %d)\n', dart, inv_dart );
@@ -83,7 +90,7 @@ end
             % set the previous darts.
             nl.prev(next_dart) = prev_dart;
             remove_from_active = [dart; inv_dart];
-            
+            error('Pending edge!');
         % pending edge 2
         elseif next_dart == dart    
             fprintf('Contract: Pending edge case 2 %d (-d = %d)\n', dart, inv_dart );
@@ -92,7 +99,7 @@ end
              % set the previous darts.
             nl.prev(next_inv) = prev_inv;
             remove_from_active = [dart; inv_dart];
-            
+            error('Pending edge!');
         % self-direct-loop 1
         elseif next_dart == inv_dart
             
@@ -100,7 +107,7 @@ end
             nl.next(prev_dart) = next_inv;
 
             remove_from_active = dart;
-            
+            error('self-direct-loop!');
         % self-direct-loop 2
         elseif next_inv == dart
             
@@ -108,6 +115,7 @@ end
             nl.next(prev_inv) = next_dart;
             
             remove_from_active = dart;
+            error('self-direct-loop!');
         % normal contracting:
         else
             nl.next(prev_dart) = next_inv;
@@ -122,6 +130,14 @@ end
         end
         
         nl.active = setdiff(nl.active,remove_from_active);
+        
+        else
+            nl.next(prev_dart) = next_inv;
+            nl.next(prev_inv) = next_dart;
+            % set the previous darts.
+            nl.prev(next_dart) = prev_inv;
+            nl.prev(next_inv) = prev_dart;
+            nl.active = setdiff(nl.active,[dart; inv_dart]);
+        end
     end
-
 end

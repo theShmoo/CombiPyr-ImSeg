@@ -79,27 +79,27 @@ function [] = removeDart(dart)
     end
            
     % pending edge 1
-    if next_inv == inv_dart
-        if DEBUG; fprintf('Remove: Pending edge %d (-d = %d)\n', dart, inv_dart ); end;
-        if REMOVE_PENDING_EDGES
-            nl.next(prev_dart) = next_dart;
-            % set the previous darts.
-            nl.prev(next_dart) = prev_dart;
-            remove_from_active = [dart; inv_dart];
-        end
+%     if next_inv == inv_dart
+%         if DEBUG; fprintf('Remove: Pending edge %d (-d = %d)\n', dart, inv_dart ); end;
+%         if REMOVE_PENDING_EDGES
+%             nl.next(prev_dart) = next_dart;
+%             % set the previous darts.
+%             nl.prev(next_dart) = prev_dart;
+%             remove_from_active = [dart; inv_dart];
+%         end
 
     % pending edge 2
-    elseif next_dart == dart    
-        if DEBUG; fprintf('Remove: Pending edge case 2 %d (-d = %d)\n', dart, inv_dart ); end;
-        if REMOVE_PENDING_EDGES
-            nl.next(prev_inv) = next_inv;
-             % set the previous darts.
-            nl.prev(next_inv) = prev_inv;
-            remove_from_active = [dart; inv_dart];
-        end
+%     elseif next_dart == dart    
+%         if DEBUG; fprintf('Remove: Pending edge case 2 %d (-d = %d)\n', dart, inv_dart ); end;
+%         if REMOVE_PENDING_EDGES
+%             nl.next(prev_inv) = next_inv;
+%              % set the previous darts.
+%             nl.prev(next_inv) = prev_inv;
+%             remove_from_active = [dart; inv_dart];
+%         end
 
     % self-direct-loop 1
-    elseif next_dart == inv_dart
+    if next_dart == inv_dart
         if DEBUG; fprintf('Remove: self-direct-loop %d (-d = %d)\n', dart, inv_dart); end;
         if REMOVE_SELF_DIRECT_LOOPS
             nl.next(prev_dart) = next_inv;

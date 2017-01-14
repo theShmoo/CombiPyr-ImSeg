@@ -1,17 +1,7 @@
 function [orbit] = getOrbit( cm, ids, DEBUG)
 %GETORBIT get the orbit of one index or multiple indices
 %INPUT:
-%   cm ... the combinatorial map: 
-%       cm.values (num_darts x 1 int16)
-%           contains the dart values
-%       cm.involution (num_darts x 1 uint32) 
-%           column the involution dart index 
-%       cm.next column (num_darts x 1 uint32)
-%           contains the index of the next dart in the map 
-%       cm.prev column (num_darts x 1 uint32)
-%           contains the index of the previous dart in the map 
-%       cm.num_darts (1 x 1 uint32) 
-%           contains the number of darts in the map
+%   cm ... the combinatorial map
 %   ids ... (num_ids x 1 uint32) the indices of which the orbit has to be
 %       obtained 
 %OUTPUT:
@@ -27,11 +17,9 @@ for id = ids'
     % iterate over the orbit until you find the starting dart and save all
     % found darts in the orbit
     next_dart = cm.next(id);
-    %assert(any(next_dart==cm.active),'access to not active dart'); 
-    %while ~any(next_dart==orbit)
     while next_dart ~= id
        if DEBUG; assert(~any(next_dart==orbit),['loop insinde getOrbit with orbit: ',num2str(orbit), ' and dart ', num2str(next_dart)]); end;
-       orbit(end+1) = next_dart;
+       orbit(end+1) = next_dart; %#ok<AGROW>
        next_dart = cm.next(next_dart);
        if DEBUG; assert(any(next_dart==cm.active),['access to not active dart ',num2str(next_dart)]); end;
     end

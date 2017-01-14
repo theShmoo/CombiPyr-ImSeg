@@ -60,16 +60,16 @@ while true
     disp(['Computing contraction darts in t = ',num2str(toc)]);
     
     if DEBUG
-        drawActiveDarts(cp.levels{end},contraction_darts); 
+        drawActiveDarts(cp.levels{end},contraction_darts,image); 
         title(['level ',num2str(cp.levels{end}.level)]);
     end;
     
     tic
-    cp.levels{end+1} = contractCombinatorialMap(cp.levels{end}, contraction_darts, DEBUG);
+    [cp.levels{end+1}, removal_canditates] = contractCombinatorialMap(cp.levels{end}, contraction_darts, DEBUG);
     disp(['Contracting darts in t = ',num2str(toc)]);
     
     tic
-    cp.levels{end} = contractionSimplification(cp.levels{end}, DEBUG);
+    cp.levels{end} = contractionSimplification(cp.levels{end}, removal_canditates, DEBUG);
     disp(['Simplify darts in t = ',num2str(toc)]);
     
     cp.num_elements(end+1) = length(cp.levels{end}.active);
@@ -80,7 +80,7 @@ while true
     end
 end
 
-drawActiveDarts(cp.levels{end});
+drawActiveDarts(cp.levels{end},[],image);
 title('last level');
 
 

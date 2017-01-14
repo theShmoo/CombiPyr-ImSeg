@@ -1,22 +1,12 @@
-function [nl] = contractCombinatorialMap( cm, contract_indices, DEBUG, neighborhood )
+function [nl, removal_canditates] = contractCombinatorialMap( cm, contract_indices, DEBUG, neighborhood )
 %contractCombinatorialMap contracts all edges in the combinatorial map
 %INPUT:
-%   cm ... the combinatorial map:
-%       cm.values (num_darts x 1 int16)
-%           contains the dart values
-%       cm.involution (num_darts x 1 uint32)
-%           column the involution dart index
-%       cm.next column (num_darts x 1 uint32)
-%           contains the index of the next dart in the map
-%       cm.prev column (num_darts x 1 uint32)
-%           contains the index of the previous dart in the map
-%       cm.num_active (1 x 1 uint32)
-%           contains the number of active darts in the map
-%       cm.active (num_active x 1) the active darts in the map
+%   cm ... the combinatorial map
 %   contract_indices ... (n x 1) the indices that get contracted
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 %OUTPUT:
 %   next_level ... the new combinatorial map which was contracted
+%   removal_canditates .... the indices of the canditates for removal
 %AUTHOR:
 %   David Pfahler
 
@@ -41,103 +31,48 @@ contract_involution = cm.involution(contract_indices);
 % build the next level by copy the old
 nl = cm;
 
+removal_canditates = [];
+
 % Contract the contraction kernels at the time
 
-for i = 1:length(contract_indices)
-    dart = contract_indices(i);
-    inv_dart = contract_involution(i);
-    contractDart(dart,inv_dart);
+for dart = contract_indices.'
+    % get the hexel
+    inv_dart = nl.involution(dart);
+    next_dart = nl.next(dart);
+    next_inv = nl.next(inv_dart);
+    prev_dart = nl.prev(dart);
+    prev_inv = nl.prev(inv_dart);
+    
+    nl.next(prev_dart) = next_inv;
+    nl.next(prev_inv) = next_dart;
+    % set the previous darts.
+    nl.prev(next_dart) = prev_inv;
+    nl.prev(next_inv) = prev_dart;
+    
+    % set the canditates for removal
+    removal_canditates = [removal_canditates; next_dart; next_inv; prev_dart; prev_inv]; %#ok<AGROW>
 end
 
 %finalize the new level:
+% remove them from active darts
+keep = true(1,max(nl.active));
+keep([contract_indices; contract_involution]) = false;
+nl.active = nl.active(keep(nl.active));
 nl.num_active = length(nl.active);
 nl.level = cm.level + 1;
 
-real_contracted = setdiff(contract_involution, nl.active);
+% remove double added darts from the canditates
+removal_canditates = unique(removal_canditates);
+% remove darts that were removed by contraction operations
+removal_canditates = intersect(nl.active, removal_canditates);
+% sort the canditates w.r.t. the dart values
+[~,idx] = sort(abs(cm.values(removal_canditates)),1,'ascend');
+removal_canditates = removal_canditates(idx);
 
-%if DEBUG
-    % change the x,y positions of the next level (debug)
-    for dart = real_contracted.'
-        dart_orbit = cm.involution(getOrbit(cm,dart,DEBUG));
-        nl.x(dart_orbit) = cm.x(dart);
-        nl.y(dart_orbit) = cm.y(dart);
-    end
-%end
-
-    function [] = contractDart(dart,inv_dart)        
-        next_dart = nl.next(dart);
-        next_inv = nl.next(inv_dart);
-        prev_dart = nl.prev(dart);
-        prev_inv = nl.prev(inv_dart);
-        
-        if DEBUG
-        hexle = [dart; inv_dart; next_dart; next_inv; prev_dart; prev_inv];
-        for h = 1:length(hexle)
-            assert(any(hexle(h)==nl.active),['access to not active dart ',num2str(hexle(h))]);
-        end
-        
-        remove_from_active = []; %#ok<*NASGU>
-        o = sort(getOrbit(nl, dart, DEBUG));
-        i_o = sort(getOrbit(nl, inv_dart, DEBUG));
-        if isequal(o, i_o)
-        % self loop! -> don't delete! this is important :D
-            error(['Contract: self loop detected: ', num2str(o)]);
-        % pending edge 1
-        elseif next_inv == inv_dart
-            fprintf('Contract: Pending edge %d (-d = %d)\n', dart, inv_dart );
-            
-            nl.next(prev_dart) = next_dart;
-            % set the previous darts.
-            nl.prev(next_dart) = prev_dart;
-            remove_from_active = [dart; inv_dart];
-            error('Pending edge!');
-        % pending edge 2
-        elseif next_dart == dart    
-            fprintf('Contract: Pending edge case 2 %d (-d = %d)\n', dart, inv_dart );
-            
-            nl.next(prev_inv) = next_inv;
-             % set the previous darts.
-            nl.prev(next_inv) = prev_inv;
-            remove_from_active = [dart; inv_dart];
-            error('Pending edge!');
-        % self-direct-loop 1
-        elseif next_dart == inv_dart
-            
-            fprintf('Contract: self-direct-loop %d (-d = %d)\n', dart, inv_dart);
-            nl.next(prev_dart) = next_inv;
-
-            remove_from_active = dart;
-            error('self-direct-loop!');
-        % self-direct-loop 2
-        elseif next_inv == dart
-            
-            fprintf('Contract: self-direct-loop case 2 %d (-d = %d)\n', dart, inv_dart);
-            nl.next(prev_inv) = next_dart;
-            
-            remove_from_active = dart;
-            error('self-direct-loop!');
-        % normal contracting:
-        else
-            nl.next(prev_dart) = next_inv;
-            nl.next(prev_inv) = next_dart;
-            % set the previous darts.
-            nl.prev(next_dart) = prev_inv;
-            nl.prev(next_inv) = prev_dart;
-            
-            fprintf('Contract: %d (-d = %d)\n', dart, inv_dart);
-            
-            remove_from_active = [dart; inv_dart];
-        end
-        
-        nl.active = setdiff(nl.active,remove_from_active);
-        
-        else
-            nl.next(prev_dart) = next_inv;
-            nl.next(prev_inv) = next_dart;
-            % set the previous darts.
-            nl.prev(next_dart) = prev_inv;
-            nl.prev(next_inv) = prev_dart;
-            nl.active = setdiff(nl.active,[dart; inv_dart]);
-        end
-    end
+% change the x,y positions of the next level (debug)
+for dart = contract_involution.'
+    dart_orbit = cm.involution(getOrbit(cm,dart,DEBUG));
+    nl.x(dart_orbit) = cm.x(dart);
+    nl.y(dart_orbit) = cm.y(dart);
+end
 end

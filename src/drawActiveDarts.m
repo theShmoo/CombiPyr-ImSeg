@@ -1,39 +1,40 @@
-function [h] = drawActiveDarts( cm, marked_darts, neighborhood )
+function [h] = drawActiveDarts( cm, marked_darts, img, neighborhood )
 %DRAWACTIVEDARTS draws the combinatorial map with all darts and labels them
 %with the id of the dart
 % INPUT:
-%   cm ... the combinatorial map: 
-%       cm.values (num_darts x 1 int16)
-%           contains the dart values
-%       cm.involution (num_darts x 1 uint32) 
-%           column the involution dart index 
-%       cm.next column (num_darts x 1 uint32)
-%           contains the index of the next dart in the map 
-%       cm.prev column (num_darts x 1 uint32)
-%           contains the index of the previous dart in the map 
-%       cm.num_darts (1 x 1 uint32) 
-%           contains the number of darts in the map
+%   image ... the image (will be plottet in the background
+%   cm ... the combinatorial map
 %   marked_darts ... (n x 1 int16) 
 %           darts thate are a subset of cm.active that will be marked red
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 % AUTHOR:
 %   David Pfahler´
     switch nargin
-        case 3
+        case 4
             % everything is fine
+        case 3
+            neighborhood = 4;
         case 2
-            %no marked darts
+            % no image
             neighborhood = 4;
+            img = [];
         case 1
-            neighborhood = 4;
+            % no marked darts
             marked_darts = [];
+            % no image
+            img = [];
         otherwise
             error('Invalid number of arguments');
     end
     assertNeighborhood(neighborhood);
 
     h = figure;
-    
+    if ~isempty(img)
+        rgb(:,:,1) = uint8(img);
+        rgb(:,:,2) = uint8(img);
+        rgb(:,:,3) = uint8(img);
+        image(rgb);
+    end
     hold on;
     plot_darts(cm.active, 0);
     if ~isempty(marked_darts)
@@ -57,10 +58,10 @@ function [h] = drawActiveDarts( cm, marked_darts, neighborhood )
         end
         
         % plot the darts
-        quiver(x,y,vec_x,vec_y, ...
-            0,line_spec, ...
-            'MaxHeadSize',0.1, ...
-            'MarkerSize',10);
+        q = quiver(x,y,vec_x,vec_y, ...
+            0,line_spec, 'MaxHeadSize',0.1, ...
+            'MarkerSize',10, ...
+            'MarkerEdgeColor','w');
 
         % text plotting:
         x_text = x + vec_x*3/4;

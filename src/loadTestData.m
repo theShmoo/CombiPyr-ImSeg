@@ -53,6 +53,11 @@ switch test_data_id
         test_data = imread('eight.tif');
     case 9
         test_data = checkerboard(4,2,1) * 255;
+    case 10
+        test_data = [ones(4,1)*128, [zeros(3); ones(1,3)*128], ones(4,2)*255];
+    case 11
+        test_data = [ones(4,1)*128, [zeros(3); ones(1,3)*128], ones(4,2)*255];
+        test_data(2,3) = 175;
     otherwise
         error('invalid test data id');
 end

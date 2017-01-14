@@ -11,8 +11,6 @@ function [ cm ] = combinatorialMap( darts, width, height, neighborhood )
 %   cm ... returns the combinatorial map: 
 %       cm.values (num_darts x 1 int16)
 %           contains the dart values
-%       cm.sorted_idx_values
-%           the sorted permutation of the values (descending)
 %       cm.involution (num_darts x 1 uint32) 
 %           column the involution dart index 
 %       cm.next column (num_darts x 1 uint32)
@@ -20,7 +18,7 @@ function [ cm ] = combinatorialMap( darts, width, height, neighborhood )
 %       cm.prev column (num_darts x 1 uint32)
 %           contains the index of the previous dart in the map
 %       cm.active (num_active x 1 uint32) 
-%           contains the active darts of this map
+%           contains the sorted active darts of this map
 %       cm.num_active (1 x 1 uint32) 
 %           contains the number of active darts in the map
 %       cm.num_darts (1 x 1 uint32)
@@ -69,9 +67,6 @@ cm.involution = uint32(zeros(num_darts,1));
 % but it gets assigned later
 cm.prev = uint32(zeros(num_darts,1));
 
-% additional combinatorical map information:
-cm.num_active = num_darts;
-cm.active = uint32(1:num_darts).';
 
 %% get the dart indices of a standard image
 dart_indices = getDartIndices(width,height);
@@ -120,6 +115,10 @@ cm.next = uint32(next_darts);
 
 %% fourth value is the index of the previous dart
 cm.prev(cm.next) = uint32(1:num_darts);
+
+% additional combinatorical map information:
+cm.num_active = num_darts;
+[~, cm.active] = sort(abs(cm.values((1:num_darts).')),1,'ascend');
 
 end
 

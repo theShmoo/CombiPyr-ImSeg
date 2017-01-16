@@ -48,16 +48,16 @@ d_image_grayscale = double(image_grayscale);
 if get_differences
     % North edges differences
     N = d_image_grayscale(:,1:end-1)-d_image_grayscale(:,2:end);
-    [N_x, N_y] = meshgrid(1:height-1,width:-1:1);
+    [N_x, N_y] = meshgrid(1:height-1,1:width);
     % South edges differences
     S = d_image_grayscale(:,2:end)-d_image_grayscale(:,1:end-1);
-    [S_x, S_y] = meshgrid(2:height,width:-1:1);
+    [S_x, S_y] = meshgrid(2:height,1:width);
     % West edges differences
     W = d_image_grayscale(1:end-1,:)-d_image_grayscale(2:end,:);
-    [W_x, W_y] = meshgrid(1:height,width-1:-1:1);
+    [W_x, W_y] = meshgrid(1:height,1:width-1);
     % East edges differences
     E = d_image_grayscale(2:end,:)-d_image_grayscale(1:end-1,:);
-    [E_x, E_y] = meshgrid(1:height,width:-1:2);
+    [E_x, E_y] = meshgrid(1:height,2:width);
     
     % convert to int16
     % int8 is sadly too small

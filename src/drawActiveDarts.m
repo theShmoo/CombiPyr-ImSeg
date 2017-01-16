@@ -1,8 +1,8 @@
-function [h] = drawActiveDarts( cm, marked_darts, img, neighborhood )
+function drawActiveDarts( cm, marked_darts, img, neighborhood )
 %DRAWACTIVEDARTS draws the combinatorial map with all darts and labels them
 %with the id of the dart
 % INPUT:
-%   image ... the image (will be plottet in the background
+%   img ... the image (will be plottet in the background
 %   cm ... the combinatorial map
 %   marked_darts ... (n x 1 int16) 
 %           darts thate are a subset of cm.active that will be marked red
@@ -28,7 +28,6 @@ function [h] = drawActiveDarts( cm, marked_darts, img, neighborhood )
     end
     assertNeighborhood(neighborhood);
 
-    h = figure;
     if ~isempty(img)
         rgb(:,:,1) = uint8(img);
         rgb(:,:,2) = uint8(img);
@@ -36,6 +35,7 @@ function [h] = drawActiveDarts( cm, marked_darts, img, neighborhood )
         image(rgb);
     end
     hold on;
+    plot_darts(cm.active, 2);
     plot_darts(cm.active, 0);
     if ~isempty(marked_darts)
         plot_darts(marked_darts, 1);
@@ -49,27 +49,39 @@ function [h] = drawActiveDarts( cm, marked_darts, img, neighborhood )
         vec_y = cm.y(darts)-y;
         vec_x = cm.x(darts)-x;
         
-        if emph_darts
+        if emph_darts == 2
+            no_text = 1;
+            line_spec = '-w';
+            line_width = 3;
+        elseif emph_darts == 1
+            no_text = 0;
             line_spec = '-r';
-            text_color = [1 0 0];
+            background_color = [1 0 0];
+            line_width = 2;
+            font_size = 10;
         else
+            no_text = 0;
             line_spec = '-k';
-            text_color = [0 0 0];
+            background_color = [1 1 1];
+            line_width = 2;
+            font_size = 10;
         end
         
         % plot the darts
         q = quiver(x,y,vec_x,vec_y, ...
-            0,line_spec, 'MaxHeadSize',0.1, ...
-            'MarkerSize',10, ...
-            'MarkerEdgeColor','w');
+            0,line_spec);
+        set(q, 'MaxHeadSize', 0.1, ...
+            'LineWidth' , line_width);
 
-        % text plotting:
-        x_text = x + vec_x*3/4;
-        y_text = y + vec_y*3/4;
-        txt = cellstr(num2str(darts));
-        t = text(x_text,y_text,txt);
-        set(t,'Color',text_color);
-        set(gca,'ytick',0:max(y+vec_y));
-        set(gca,'xtick',0:max(x+vec_x));
+        if ~no_text
+            % text plotting:
+            x_text = x + vec_x*3/4;
+            y_text = y + vec_y*3/4;
+            txt = cellstr(num2str(darts));
+            t = text(x_text,y_text,txt);
+            set(t,'FontSize', font_size, ...
+                'BackgroundColor', background_color, ...
+                'Margin', 1 );
+        end
     end
 end

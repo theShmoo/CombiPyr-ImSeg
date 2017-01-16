@@ -57,31 +57,29 @@ while true
     
     tic
     contraction_darts = computeContractionDarts(cp.levels{end},DEBUG);
-    disp(['Computing contraction darts in t = ',num2str(toc)]);
+    disp(['Computing contraction darts in t = ', num2str(toc)]);
     
     if DEBUG
+        figure;
         drawActiveDarts(cp.levels{end},contraction_darts,image); 
-        title(['level ',num2str(cp.levels{end}.level)]);
+        title(['level ',num2str(cp.levels{end}.level), ' before contracting']);
     end;
     
     tic
     [cp.levels{end+1}, removal_canditates] = contractCombinatorialMap(cp.levels{end}, contraction_darts, DEBUG);
-    disp(['Contracting darts in t = ',num2str(toc)]);
+    disp(['Contracting darts in t = ', num2str(toc)]);
     
     tic
-    cp.levels{end} = contractionSimplification(cp.levels{end}, removal_canditates, DEBUG);
-    disp(['Simplify darts in t = ',num2str(toc)]);
+    [cp.levels{end}, finished] = contractionSimplification(cp.levels{end}, removal_canditates, DEBUG);
+    disp(['Simplify darts in t = ', num2str(toc)]);
     
     cp.num_elements(end+1) = length(cp.levels{end}.active);
     if cp.num_elements(end) == 0
-       error('contracted and removed too much');
-    elseif cp.num_elements(end) == cp.num_elements(end-1) || isempty(contraction_darts)
+        disp('contracted and removed too much');
+        break;
+    elseif cp.num_elements(end) == cp.num_elements(end-1) || isempty(contraction_darts) || finished
         break;
     end
 end
-
-drawActiveDarts(cp.levels{end},[],image);
-title('last level');
-
 
 end

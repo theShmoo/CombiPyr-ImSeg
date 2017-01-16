@@ -1,4 +1,4 @@
-function [nl] = contractionSimplification( nl, removal_canditates, DEBUG, neighborhood )
+function [nl, finished] = contractionSimplification( nl, removal_canditates, DEBUG, neighborhood )
 %contractCombinatorialMap contracts all edges in the combinatorial map
 %INPUT:
 %   nl ... the combinatorial map:
@@ -7,6 +7,7 @@ function [nl] = contractionSimplification( nl, removal_canditates, DEBUG, neighb
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 %OUTPUT:
 %   next_level ... the new combinatorial map which was contracted
+%   finished ... returns 1 if it is finished
 %AUTHOR:
 %   David Pfahler
 
@@ -33,8 +34,11 @@ end;
 
 faceSpec = 'Face with %d darts = (';
 
+finished = 0;
+
 if isequal(sort(getOrbit(nl, nl.active(1), DEBUG)),sort(nl.active).')
     if DEBUG; disp('Remove cancled!'); end;
+    finished = 1;
     return;
 end
 
@@ -93,15 +97,20 @@ for face_dart = removal_canditates.'
         % normal case
         else
             nl.next(prev_dart) = next_dart;
-            nl.next(prev_inv) = next_inv;
-            % set the previous darts.
             nl.prev(next_dart) = prev_dart;
-            nl.prev(next_inv) = prev_inv;
+            
+            if next_inv ~= inv_dart
+                nl.next(prev_inv) = next_inv;
+                nl.prev(next_inv) = prev_inv;
+            elseif DEBUG
+                 fprintf('Pending Edge removed!\n');
+            end
+            
 
             if DEBUG; fprintf('Remove: %d with -d = %d\n', dart, inv_dart); end;
         end
 
-        %in this case the involution face is visited because the dart is
+        %in this case the involution dart is visited because the dart is
         %removed
         visited(inv_dart) = 1;
         nl.active(nl.active==dart) = [];

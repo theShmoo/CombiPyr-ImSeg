@@ -58,6 +58,12 @@ switch test_data_id
     case 11
         test_data = [ones(4,1)*128, [zeros(3); ones(1,3)*128], ones(4,2)*255];
         test_data(2,3) = 175;
+    case 12
+        test_data = zeros(10,10);
+        test_data(3:8,3:8) = ones(6,6) * 128;
+        test_data(5:6,5:6) = ones(2,2) * 255;
+    case 13
+        test_data = imread('circles.png');
     otherwise
         error('invalid test data id');
 end

@@ -31,7 +31,7 @@ contract_involution = cm.involution(contract_indices);
 % build the next level by copy the old
 nl = cm;
 
-removal_canditates = [];
+%removal_canditates = [];
 
 % Contract the contraction kernels at the time
 
@@ -50,7 +50,7 @@ for dart = contract_indices.'
     nl.prev(next_inv) = prev_dart;
     
     % set the canditates for removal
-    removal_canditates = [removal_canditates; next_dart; next_inv; prev_dart; prev_inv]; %#ok<AGROW>
+    %removal_canditates = [removal_canditates; next_dart; next_inv; prev_dart; prev_inv]; %#ok<AGROW>
 end
 
 %finalize the new level:
@@ -62,12 +62,13 @@ nl.num_active = length(nl.active);
 nl.level = cm.level + 1;
 
 % remove double added darts from the canditates
-removal_canditates = unique(removal_canditates);
+%removal_canditates = unique(removal_canditates);
 % remove darts that were removed by contraction operations
-removal_canditates = intersect(nl.active, removal_canditates);
+%removal_canditates = intersect(nl.active, removal_canditates);
 % sort the canditates w.r.t. the dart values
-[~,idx] = sort(abs(cm.values(removal_canditates)),1,'ascend');
-removal_canditates = removal_canditates(idx);
+%[~,idx] = sort(abs(cm.values(removal_canditates)),1,'ascend');
+%removal_canditates(idx);
+removal_canditates = nl.active;
 
 % change the x,y positions of the next level (debug)
 for dart = contract_involution.'

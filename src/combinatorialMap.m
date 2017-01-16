@@ -116,7 +116,7 @@ cm.next = uint32(next_darts);
 %% fourth value is the index of the previous dart
 cm.prev(cm.next) = uint32(1:num_darts);
 
-% additional combinatorical map information:
+%% additional combinatorical map information:
 cm.num_active = num_darts;
 [~, cm.active] = sort(abs(cm.values((1:num_darts).')),1,'ascend');
 

@@ -13,7 +13,7 @@ function [ test_data, width, height ] = loadTestData( test_data_id, plot_image )
 %   width ... the width of the image
 %   height ... the height of the image
 %COPYRIGHT:
-%   David Pfahler 2016
+%   David Pfahler 2017
 %PROJECT:
 %   CombPyr_ImSeg
 

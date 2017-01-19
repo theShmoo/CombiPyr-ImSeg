@@ -4,13 +4,14 @@ function [ cp ] = buildCombinatoricalPyramid( image, DEBUG, neighborhood )
 %INPUT:
 %   image_grayscale ... the grayscale input image (default:
 %   'cameraman.tif') 
+%   DEBUG ... if debug checks and output should be done (default: false)
 %   neighborhood ... the neighborhood. Currently only 4 is supported
 %   (default: 4)
 %OUTPUT:
 %   cp ... the dart values for every neighbor as cell array (N, S,
 %   W, E) 
 %COPYRIGHT:
-%   David Pfahler 2016
+%   David Pfahler 2017
 %PROJECT:
 %   CombPyr_ImSeg
 

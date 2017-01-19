@@ -1,5 +1,5 @@
 %COPYRIGHT:
-%   David Pfahler 2016
+%   David Pfahler 2017
 %PROJECT:
 %   CombPyr_ImSeg
 

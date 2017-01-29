@@ -12,6 +12,10 @@
 %%% Colors are nice
 \usepackage[dvipsnames]{xcolor}   % used for simple color names (e.g. "red")
 
+% own colors
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
 %%% hyperref
 \usepackage{hyperref}
 \newcommand\myshade{85}
@@ -27,6 +31,24 @@
 
 % Code
 \usepackage{listings}
+\lstset{language=Matlab,
+    %basicstyle=\color{red},
+    breaklines=true,%
+    morekeywords={matlab2tikz},
+    keywordstyle=\color{blue},%
+    morekeywords=[2]{1}, keywordstyle=[2]{\color{black}},
+    identifierstyle=\color{black},%
+    stringstyle=\color{mylilas},
+    commentstyle=\color{mygreen},%
+    frame=single,
+    showstringspaces=false,%without this there will be a symbol in the places where there is a space
+    numbers=left,%
+    numberstyle={\tiny \color{black}},% size of the numbers
+    numbersep=9pt, % this defines how far the numbers are from the text
+    emph=[1]{for,end,break},emphstyle=[1]\color{red}, %some words to emphasise
+    emph=[2]{...},emphstyle=[2]\color{mylilas}
+    %emph=[2]{word1,word2}, emphstyle=[2]{style},
+}
 
 % Clever references need to be loaded after hyperref!
 \usepackage[capitalize,nameinlink]{cleveref}       % used for clever references!
@@ -43,6 +65,7 @@
 
 %tikz party
 \usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
 
 %supergmiadliche diagrams
 \usepackage{smartdiagram}
@@ -120,8 +143,7 @@ To create the RAG the pixel array of the image needs to be transformed into a gr
 This is a computational expensive process, because in contrast to the implicit representation in the system memory of a pixel array, a graph representation needs to save pointers for the darts to the nodes (which are the pixels) of the image.
 \par
 The Combinatorial Map (CM) supports an efficient way to represent the darts in the system memory.
-Additionally it enables the application of the graph operations to \emph{contract} and \emph{remove} a dart.
-
+Additionally it enables the application of the graph operations to \emph{contract} and \emph{remove} a dart. \cref{tab:combmap} shows the representation of the CM of \cref{fig:combmap} in the memory.
 % subsection problem (end)
 
 \begin{table}[tb]
@@ -137,18 +159,53 @@ Additionally it enables the application of the graph operations to \emph{contrac
   \end{tabular}
 \end{table}
 
-\subsection{Outline} % (fold)
-\label{sub:outline}
-
-In the \cref{sec:development_methodology} I introduced the literature research (\cref{sub:related_work}) and I present the pre-work I did to understand the CM (\cref{sub:python_implementation}).
-In the \cref{sec:computation_of_the_dart_values,sec:construction_of_the_initial_cm_level,sec:construction_of_the_pyramid} the \texttt{MATLAB} implementation is described in detail and in \cref{sec:results} I present the results.
-
-% subsection outline (end)
-
 % section introduction (end)
 
 \section{Development methodology} % (fold)
 \label{sec:development_methodology}
+
+I separated the development process into four phases.
+
+\begin{description}
+  \item[Phase 1: Existing Work] I did some literature research to get familiar with the topic. (\cref{sub:related_work})
+  \item[Phase 2: Meet the Maps] I created an \texttt{Python} application to explore the properties of an neighborhood graph of an image. (\cref{sub:python_implementation})
+  \item[Phase 3: Implementation] The actual \texttt{Matlab} implementation is based on the work of the first two phases. (\cref{sec:computation_of_the_dart_values,sec:construction_of_the_initial_cm_level,sec:construction_of_the_pyramid})
+  \item[Phase 4: Results] In the end I created some results. (\cref{sec:results})
+\end{description}
+
+The \cref{fig:cp_creation_process} shows a flowchart of the creation of the CP\@.
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20,
+    text width=8em, node distance=3cm, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
+\begin{figure}[tb]
+  \centering
+  \begin{tikzpicture}[node distance = 2cm, auto]
+    % Place nodes
+    \node [cloud] (start) {start};
+    \node [block,right of=start] (values) {Compute dart values (\cref{sec:computation_of_the_dart_values})};
+    \node [block,right of=values, node distance=5cm] (init) {Build initial CM level (\cref{sec:construction_of_the_initial_cm_level})};
+    \node [decision,below of=init] (top) {top level reached?};
+    \node [block,below of=top,left of=top] (next) {Build Next Level (\cref{sec:construction_of_the_pyramid})};
+    \node [cloud,right of=top] (end) {End};
+
+    % Draw edges
+    \path [line] (start) -- (values);
+    \path [line] (values) -- (init);
+    \path [line] (init) -- (top);
+    \path [line] (top) -- node [near start] {yes} (end);
+    \path [line] (next) |- (top);
+    \path [line] (top) |- node {no}(next);
+\end{tikzpicture}
+  \caption{The CP creation process}
+  \label{fig:cp_creation_process}
+\end{figure}
+
 
 \subsection{Related work} % (fold)
 \label{sub:related_work}
@@ -179,103 +236,124 @@ In the \cref{sec:computation_of_the_dart_values,sec:construction_of_the_initial_
   \caption{(a) an input image. (b) the segmented image at the first level. (c) the top level of the combinatorial pyramid. (d) Combine and remove operations on a graph}\label{fig:prip}
 \end{figure}
 
-\cite{torrescanonical} is a Technical Report about operations
-on a Combinatorial Pyramid (CP)
-
-Recap: Operations on a Combinatorial Map (CM):
-Remove
-Contract
-
-\cite{brun2001introduction} is an introduction to the CP. With
-background information an the contraction
-kernel.
-
-Recap: Contraction Kernel
+The work from Torres and Kropatsch~\cite{torrescanonical} presents a technical report about operations on a CP\@.
+The operations I used in my work are the removal of a dart and the contraction of a two darts. These operations are presented in detail later.
+\par
+\cref{fig:combine_remove} shows the creation of a CP with these two operations on a small graph and also the unfolding of the pyramid with the inverse operations. \cref{fig:prip2} shows all darts that can be contracted or removed from the input image \cref{fig:prip1}. \cref{fig:prip3} shows the top of the CP, which is the RAG of the input image.
+\par
+The work from Brun and Kropatsch~\cite{brun2001introduction} is an introduction to the CP\@. It presents background information to the contraction
+kernel of the CP\@. \cref{fig:creationg_of_a_kernel} shows the creation of a contraction kernel. From the neighborhood graph of the input image (\cref{fig:contract_kernel1}) survivor nodes are selected (\cref{fig:contract_kernel2}). A spanning forest is created, so that every node of the original graph can only be reached from one survivor node (\cref{fig:contract_kernel3}). Then every created tree is contracted into the surviving node and these nodes are connected again (\cref{fig:contract_kernel4}). \cref{fig:contract_kernel5,fig:contract_kernel6,fig:contract_kernel7,fig:contract_kernel8} show the same steps again for this created new pyramid level.
+\par
 
 \begin{figure}[tb]
   \centering
-
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel1}
+      \includegraphics[width=\textwidth]{img/contract_kernel2}
       \caption{}\label{fig:contract_kernel1}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel2}
+      \includegraphics[width=\textwidth]{img/contract_kernel3}
       \caption{}\label{fig:contract_kernel2}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel3}
+      \includegraphics[width=\textwidth]{img/contract_kernel4}
       \caption{}\label{fig:contract_kernel3}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel4}
+      \includegraphics[width=\textwidth]{img/contract_kernel5}
       \caption{}\label{fig:contract_kernel4}
   \end{subfigure}
 
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel5}
+      \includegraphics[width=\textwidth]{img/contract_kernel6}
       \caption{}\label{fig:contract_kernel5}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel6}
+      \includegraphics[width=\textwidth]{img/contract_kernel7}
       \caption{}\label{fig:contract_kernel6}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
-      \includegraphics[width=\textwidth]{img/contract_kernel7}
+      \includegraphics[width=\textwidth]{img/contract_kernel1}
       \caption{}\label{fig:contract_kernel7}
   \end{subfigure}
   ~
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel8}
-      \caption{}
-      \label{fig:contract_kernel8}
+      \caption{}\label{fig:contract_kernel8}
   \end{subfigure}
 
   \caption{The creation of a contraction kernel}
   \label{fig:creationg_of_a_kernel}
 \end{figure}
 
-\cite{brun2003contraction} describes contraction in parallel with
-contraction kernels
+The further work from Brun and Kropatsch~\cite{brun2003contraction} step into detail of the contraction of darts in parallel. \cref{fig:parallel} shows the conflict of the contraction in parallel. As one can see, if the two marked red darts are selected for contraction and contracted at the same time, it would be undefined were the dart marked with the red question mark would start and end.
 
-Recap: Problem why parallel
-contraction/removal is not trivial
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=0.4\textwidth]{img/compar.pdf}
+  \caption{Contracting in parallel is not trivial}
+  \label{fig:parallel}
+\end{figure}
 
 % subsection related_work (end)
 
 \subsection{Python implementation} % (fold)
 \label{sub:python_implementation}
 
-I Implemented a simple python class for CM
-Not for computations but for representations
-
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[caption={how to use the created \texttt{Python} class},label={lst:python},language=Python]
 import CombinatorialMap
 map = CombinatorialMap()
-map.setSize(5, 5)
+map.setSize(3, 5)
 map.printNodes()
 \end{lstlisting}
 
-Also created functions to receive:
-All darts with specific direction
-All involutions of specific darts
-The orbit of a vertex
-All next darts
-…
+To start working with CP I tried to explore the properties of a CM\@. This was not as easy as I thought and there are not many implementations of this matter available. So I decided ti implement a simple \emph{Python} class for CM\@.
+This class was not for computations and operations on the CM but for the representation and especially the transformation of an image to a CM\@.
+\par
+The created class is easy to use as the \cref{lst:python} shows. As already mentioned the class is only a tool to get the representation of an image. In this example the dart indices of a \( 3 \times 5 \) image are shown. The output of this function is shown in \cref{lst:output_python}.
 
-These are used to understand and create a
-CM from an image
+\begin{lstlisting}[caption={The output of \cref{lst:python}},label={lst:output_python},language=bash,float,floatplacement=H,basicstyle=\scriptsize]
+nodes:
+    O -  5, 2 -   O -  8, 4 -   O - 11, 7 -   O - 13,10 -   O
+    |             |             |             |             |
+   1,14          3,17          6,21          9,25         12,29
+    |             |             |             |             |
+    O - 20,16 -   O - 24,19 -   O - 28,23 -   O - 31,27 -   O
+    |             |             |             |             |
+  15,32         18,34         22,37         26,40         30,43
+    |             |             |             |             |
+    O - 36,33 -   O - 39,35 -   O - 42,38 -   O - 44,41 -   O
+\end{lstlisting}
+
+Additionally I created functions to receive:
+\begin{itemize}
+  \item All darts with a specific direction (N, E, S, W)
+  \item All involutions of specific darts
+  \item Changing the neighborhood function
+  \item The orbit of a node
+  \item The permutation \( \sigma \) and the involution \( \alpha \) of a set of darts
+  \item \ldots
+\end{itemize}
+
 % subsection python_implementation (end)
+
+This helped me to understand the dependencies of the indexing of the darts.
 
 % section development_methodology (end)
 
 \section{Computation of the dart values} % (fold)
 \label{sec:computation_of_the_dart_values}
+
+A dart in an image is a transition from one pixel to another. In my implementation I used the 4 neighborhood of the pixel for the creation of the image graph.
+The value of a transition should represent the change of the pixel value.
+So I computed from every pixel the change of the pixel value to every neighbor of their neighborhood (N,E,S,W).
+\par
+\cref{fig:dart_values} visualizes the resulting dart values for every cardinal direction.
 
 \begin{figure}[tb]
   \centering
@@ -290,18 +368,15 @@ CM from an image
         \caption{}\label{fig:dart_values_news}
     \end{subfigure}
 
-  \caption{\todo{caption}}\label{fig:dart_values}
+  \caption{(a) The gray scale input image (b) the transition values from every pixel to its North, South, West and East pixel neighbor. The displayed pixel value range of the differences is mapped from [-128,128] to [0,255]}\label{fig:dart_values}
 \end{figure}
-
-A dart in an image is a transition from one pixel to
-another.
-Compute from every pixel the change of the pixel
-value to every neighbor (N,E,S,W)
 
 % section computation_of_the_dart_values (end)
 
 \section{Construction of the initial CM level} % (fold)
 \label{sec:construction_of_the_initial_cm_level}
+
+I used the \texttt{Python} implementation presented in \cref{sub:python_implementation} to understand the indexing of the darts.
 
 \subsection{Computation of the dart indices} % (fold)
 \label{sub:computation_of_the_dart_indices}
@@ -322,13 +397,15 @@ Additional exceptions for the corners
 
 Computation of the next index:
 one row:
-\begin{lstlisting}[language=Matlab]
+\begin{lstlisting}
 repmat([2; 2; -1; -3], width-2, 1)
 \end{lstlisting}
 middle of the image:
 
-\begin{lstlisting}[language=Matlab]
-repmat([next_darts_one_row; 1; 1; -2; 2; -1; -1],height-2, 1)
+\begin{lstlisting}
+repmat( ...
+  [next_darts_one_row; 1; 1; -2; 2; -1; -1], ...
+  height-2, 1)
 \end{lstlisting}
 
 Special cases for first and last row
@@ -342,7 +419,7 @@ Involution \( \alpha \)
 
 Previous Dart \( \rho \)
 
-\begin{lstlisting}[language=Matlab]
+\begin{lstlisting}
 cm.involution(N) = S
 cm.involution(E) = W
 
@@ -498,6 +575,14 @@ Self-Direct-Loops (2 cases)
 
 \section{Results} % (fold)
 \label{sec:results}
+
+I published my work on the platform \texttt{Github}\cite{github}. The repository is called: \url{https://github.com/theShmoo/CombiPyr-ImSeg} and it contains:
+\begin{itemize}
+  \item The source code of the \texttt{Python} implementation (\cref{sub:python_implementation}).
+  \item The source code of the \texttt{Matlab} implemenation (\cref{sec:computation_of_the_dart_values,sec:construction_of_the_initial_cm_level,sec:construction_of_the_pyramid}).
+  \item My presentation of the work, held in the lecture.
+  \item This documentation.
+\end{itemize}
 
 % section results (end)
 

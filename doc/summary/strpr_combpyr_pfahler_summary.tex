@@ -170,10 +170,10 @@ I separated the development process into four phases.
   \item[Phase 1: Existing Work] I did some literature research to get familiar with the topic. (\cref{sub:related_work})
   \item[Phase 2: Meet the Maps] I created an \texttt{Python} application to explore the properties of an neighborhood graph of an image. (\cref{sub:python_implementation})
   \item[Phase 3: Implementation] The actual \texttt{Matlab} implementation is based on the work of the first two phases. (\cref{sec:computation_of_the_dart_values,sec:construction_of_the_initial_cm_level,sec:construction_of_the_pyramid})
+  The \cref{fig:cp_creation_process} shows a flowchart of the creation of the CP\@.
   \item[Phase 4: Results] In the end I created some results. (\cref{sec:results})
 \end{description}
 
-The \cref{fig:cp_creation_process} shows a flowchart of the creation of the CP\@.
 
 % Define block styles
 \tikzstyle{decision} = [diamond, draw, fill=blue!20,
@@ -317,7 +317,7 @@ This class was not for computations and operations on the CM but for the represe
 \par
 The created class is easy to use as the \cref{lst:python} shows. As already mentioned the class is only a tool to get the representation of an image. In this example the dart indices of a \( 3 \times 5 \) image are shown. The output of this function is shown in \cref{lst:output_python}.
 
-\begin{lstlisting}[caption={The output of \cref{lst:python}},label={lst:output_python},language=bash,float,floatplacement=H,basicstyle=\scriptsize]
+\begin{lstlisting}[caption={The output of the commands of \cref{lst:python}},label={lst:output_python},language=bash,float,floatplacement=H,basicstyle=\scriptsize]
 nodes:
     O -  5, 2 -   O -  8, 4 -   O - 11, 7 -   O - 13,10 -   O
     |             |             |             |             |
@@ -377,30 +377,45 @@ So I computed from every pixel the change of the pixel value to every neighbor o
 \label{sec:construction_of_the_initial_cm_level}
 
 I used the \texttt{Python} implementation presented in \cref{sub:python_implementation} to understand the indexing of the darts.
+The following properties of the image need to get calculated to obtain an initial CM\@:
+\begin{itemize}
+  \item The dart indices \( x \) of the dart values from the previous section.
+  \item The permutation \( \sigma(x) \)
+  \item The involution \( \alpha(x) \)
+  \item The previous dart of the dart index \( \rho(x) := \sigma^{-1}(x)  \)
+\end{itemize}
 
 \subsection{Computation of the dart indices} % (fold)
 \label{sub:computation_of_the_dart_indices}
 
-Computation of the dart indices
-Example South Indices:
-Added by 4 inside the image. On the border it
-is only added by 3 (because the west dart is
-missing)
-Also exceptions in the first row and the last
-row (missing north dart)
-Additional exceptions for the corners
+The indexing of the dart values is motivated by the output from \cref{lst:output_python}. As one can see the next index with the same direction is gained by adding 4, if it is inside the image.
+On the border it is only added by 3, because one dart is missing. Additional similar exceptions occur on the corners.
 
 % subsection computation_of_the_dart_indices (end)
 
 \subsection{Computation of the next index} % (fold)
 \label{sub:computation_of_the_next_index}
 
-Computation of the next index:
-one row:
+\begin{table}[tb]
+  \caption{The permutation \( \sigma \) of a \( 3 \times 3 \) image}
+  \label{tab:permutation}
+  \centering
+
+  \tiny
+  \begin{tabular}{lrrrrrrrrrrrrrrrrrrrrrrrr}
+  \toprule
+  \( x \)& 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 \\
+\( \sigma \)& 2 & 1 & 5 & 3 & 4 & 7 & 6 & 10& 8 & 9 & 13& 14& 12& 11& 16& 17& 15& 19& 18& 21& 22& 20& 24& 23 \\
+\( x - \sigma \)& 1 & -1 & 2 & -1 & -1 & 1 & -1 &  2 & -1 & -1 &  2 &  2 &  -1 &  -3 &  1 &  1 &  -2 &  1 &  -1 &  1 &  1 &  -2 &  1 & -1\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+By looking at the permutation of an image a pattern can be observed. \cref{tab:permutation} shows the permutation \( \sigma \) of a \( 3 \times 3 \) image. One can see that for one row within the image the next dart has an image difference of:
 \begin{lstlisting}
 repmat([2; 2; -1; -3], width-2, 1)
 \end{lstlisting}
-middle of the image:
+Which results in the differences for the whole middle of the image:
 
 \begin{lstlisting}
 repmat( ...
@@ -408,20 +423,25 @@ repmat( ...
   height-2, 1)
 \end{lstlisting}
 
-Special cases for first and last row
+Once again special cases occur for the borders of the image.
 
 % subsection computation_of_the_next_index (end)
 
 \subsection{Computation of the other properties} % (fold)
 \label{sub:computation_of_the_other_properties}
 
-Involution \( \alpha \)
+The other properties of the image are more easy to calculate:
 
-Previous Dart \( \rho \)
+\begin{itemize}
+  \item The involution \( \alpha \) for the indices of the darts that point to the north are the indices that point to south (and vice versa).
+  \item The previous dart \( \rho \)  of the next dart \( \sigma \) is the dart \( x \) itself.
+\end{itemize}
 
 \begin{lstlisting}
 cm.involution(N) = S
+cm.involution(S) = N
 cm.involution(E) = W
+cm.involution(W) = E
 
 cm.prev(cm.next) = 1:num_darts
 \end{lstlisting}
@@ -438,13 +458,15 @@ cm.prev(cm.next) = 1:num_darts
 \centering
 \smartdiagram[circular diagram:clockwise]
 {
+  Compute Contraction Kernel (\cref{sub:compute_the_contraction_kernel}),
   Contract Darts (\cref{sub:contraction}),
-  Simplify Level (\cref{sub:simplification}),
-  Compute Contraction Kernel (\cref{sub:compute_the_contraction_kernel})
+  Simplify Level (\cref{sub:simplification})
 }
 \caption{The creation loop of the pyramid}%
 \label{fig:creation loop}
 \end{figure}
+
+After the initial CM is created the map needs to be reduced. The iterative reduction of the CM with the loop described in \cref{fig:creation loop} the CP is created.
 
 \subsection{Compute the contraction kernel} % (fold)
 \label{sub:compute_the_contraction_kernel}
@@ -478,20 +500,31 @@ cm.prev(cm.next) = 1:num_darts
       \caption{}\label{fig:contraction_kernel_greedy5}
   \end{subfigure}
 
-  \caption{(a) Assign next best dart for CK (b) Get the involution of the dart and the orbit of the involution (c) now remove the involution of the involution orbit from the set of valid darts (d) now get the orbit of the dart (e) And remove its involution}
+  \caption{(a) Assign next best dart for the contraction kernel (b) Get the involution of the dart and the orbit of the involution (c) now remove the involution of the involution orbit from the set of valid darts (d) now get the orbit of the dart (e) And remove its involution}
   \label{fig:contraction_kernel_greedy}
 \end{figure}
 
-Sort the darts by its values
-Add dart to contraction kernel if:
+Initially the darts are sorted by its values. This sorting only needs to be done once for the initial CM\@. For the reduction a contraction kernel needs to be defined (\cref{sub:related_work}). I implemented a greedy algorithm to calculate the kernel.
+\par
+\cref{fig:contraction_kernel_greedy} shows the creation of the kernel.
+\begin{itemize}
+  \item First assign next best dart for the contraction kernel (\cref{fig:contraction_kernel_greedy1})
+  \item Then get the involution of the dart and the orbit of the involution (\cref{fig:contraction_kernel_greedy2})
+  \item Now remove the involution of the involution orbit from the set of valid darts (\cref{fig:contraction_kernel_greedy3})
+  \item Now get the orbit of the dart (\cref{fig:contraction_kernel_greedy4})
+  \item And remove its involution
+  \item Repeat until there are no valid darts left
+\end{itemize}
 
-Exceptions:
-Self loops
-Pending edges
+There are two exceptions for the adding of darts to the contraction kernel:
+\emph{Self loops} and \emph{pending edges}.
+\par
+A self loop is detected by checking if the orbit of the dart is the same as the orbit of the involution of the dart. And the orbit of a pending edge contains only the edge itself.
+
+The red darts in \cref{fig:dart_contract} show the contraction kernels for three different images.
 
 \begin{figure}[tb]
   \centering
-
     \begin{subfigure}[t]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/contract2.jpg}
       \caption{}\label{fig:dart_contract2}
@@ -506,7 +539,7 @@ Pending edges
       \includegraphics[width=\textwidth]{img/contract1.jpg}
       \caption{}\label{fig:dart_contract1}
     \end{subfigure}
-  \caption{\todo{caption}}\label{fig:dart_contract}
+  \caption{The red darts show the contraction kernels for the three images.}\label{fig:dart_contract}
 \end{figure}
 
 % subsection compute_the_contraction_kernel (end)
@@ -514,13 +547,13 @@ Pending edges
 \subsection{Contraction} % (fold)
 \label{sub:contraction}
 
-Recap: Contract Darts
+The contraction of a dart in a CM is calculated with only 4 changes of the CM\@. The next \( \sigma'(\rho(x))\) and previous \( \rho'(\sigma(x))\) dart need to get updated for the dart  \( x \) and its involution \( \alpha(x) \). And  \( x \) and \( \alpha(x) \) are removed from the set of active darts.
 
 \begin{align}
-  \sigma'(\rho(x))   &:= \sigma(-x)    \\
-  \sigma'(\rho(-x))  &:= \sigma(x)     \\
-  \rho'(\sigma(x))   &:= \rho(-x) \\
-  \rho'(\sigma(-x))  &:= \rho(x)
+  \sigma'(\rho(x))   &:= \sigma(\alpha(x))    \\
+  \sigma'(\rho(\alpha(x)))  &:= \sigma(x)     \\
+  \rho'(\sigma(x))   &:= \rho(\alpha(x))      \\
+  \rho'(\sigma(\alpha(x)))  &:= \rho(x)
 \end{align}
 
 % subsection contraction (end)
@@ -536,9 +569,8 @@ Recap: Contract Darts
 \end{figure}
 
 When contracting darts double edges and self-direct-loops are created. By removing these darts the pyramid is easier to read.
-\todo{faster to compute check}
 
-Check if the face of a dart \(x\) has less than 2 darts:
+For detecting them the face of a dart \(x\) is needed:
 
 \begin{itemize}
   \item Get the involution \(\alpha(x)\)
@@ -546,8 +578,24 @@ Check if the face of a dart \(x\) has less than 2 darts:
   \item add this to the face and repeat for this dart until the initial dart is reached
 \end{itemize}
 
-Special cases for removal:
-Self-Direct-Loops (2 cases)
+If the number of darts in the face is smaller than 3 the dart can be removed.
+\cref{fig:faces} shows a configuration of darts that build up a double edge. The face of the green marked dart has two darts, which can be removed.
+The removal operation is similar to the contract operation:
+
+\begin{align}
+  \sigma'(\rho(x))   &:= \sigma(x)                \\
+  \sigma'(\rho(\alpha(x)))  &:= \sigma(\alpha(x)) \\
+  \rho'(\sigma(x))   &:= \rho(x)                  \\
+  \rho'(\sigma(\alpha(x)))  &:= \rho(\alpha(x))
+\end{align}
+
+If \( x \) is equal to \( \alpha(x) \) a self-direct-loop is detected. The removal of this has to be treated differently:
+
+\begin{align}
+  \sigma'(\rho(x))  &:= \sigma(\alpha(x)) \\
+\end{align}
+
+\cref{fig:dart_simply} shows the simplification after the contraction of the contraction kernel. As one can see the number of darts is reduced significantly.
 
 \begin{figure}[tb]
   \centering
@@ -566,7 +614,7 @@ Self-Direct-Loops (2 cases)
       \includegraphics[width=\textwidth]{img/simply1.jpg}
       \caption{}\label{fig:dart_simply1}
     \end{subfigure}
-  \caption{\todo{caption}}\label{fig:dart_simply}
+  \caption{(a) the contraction kernel of the input image. (b) the darts after the contraction step (c) the darts after simplification}\label{fig:dart_simply}
 \end{figure}
 
 % subsection simplification (end)
@@ -576,6 +624,47 @@ Self-Direct-Loops (2 cases)
 \section{Results} % (fold)
 \label{sec:results}
 
+\begin{figure}[tb]
+  \centering
+
+    \begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{img/result.jpg}
+      \caption{}\label{fig:result1}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[b]{0.4\textwidth}
+      \includegraphics[width=\textwidth]{img/result2.jpg}
+      \caption{}\label{fig:result2}
+    \end{subfigure}
+  \caption{The two test images. The shown darts are the darts of the top pyramid level.}\label{fig:result}
+\end{figure}
+
+\subsection{Performance} % (fold)
+\label{sub:performance}
+
+\begin{table}[tb]
+  \caption{caption here}
+  \label{tab:tablename}
+  \centering
+
+  \begin{tabular}{lcc}
+  \toprule
+  \textbf{Image} & \textbf{initial CM} & \textbf{Contraction\\ level 1} & \textbf{Simplification\\ level 1} & \textbf{Total}\\
+    \cref{fig:result1} & 0.05 & & &\\
+    \cref{fig:result2} & & & &\\
+  \bottomrule
+  \end{tabular}
+\end{table}
+
+The implementation was tested on a  Processor Intel(R) Core(TM) i7-3770K CPU @ 3.50GHz, 3501 Mhz, 4 Core(s), 8 Logical Processor(s) with installed 16,0 GB physical memory (RAM).
+
+The bottle neck of the implementation was the simplification process. Which took for the two.
+
+% subsection performance (end)
+
+\subsection{Publication} % (fold)
+\label{sub:publication}
+
 I published my work on the platform \texttt{Github}\cite{github}. The repository is called: \url{https://github.com/theShmoo/CombiPyr-ImSeg} and it contains:
 \begin{itemize}
   \item The source code of the \texttt{Python} implementation (\cref{sub:python_implementation}).
@@ -583,6 +672,9 @@ I published my work on the platform \texttt{Github}\cite{github}. The repository
   \item My presentation of the work, held in the lecture.
   \item This documentation.
 \end{itemize}
+
+% subsection publication (end)
+
 
 % section results (end)
 

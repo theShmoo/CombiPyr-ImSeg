@@ -88,7 +88,7 @@
 \newtheorem{example}{Example}[section]
 \newtheorem{theorem}[example]{Theorem}
 
-\title{Combinatorial Pyramids – Development and Lessons Learned}
+\title{Combinatorial Pyramids --- An Implementation in Matlab}
 \author{David Pfahler}
 \date{Technical Report for \\ \emph{Structural Pattern Recognition 2016W}}
 
@@ -96,7 +96,7 @@
 %-----------------------------------------------------------------------------
 \begin{document}
 
-\debugtrue
+\debugfalse
 
 %-----------------------------------------------------------------------------
 %-----------------------------------------------------------------------------
@@ -108,10 +108,10 @@
   \caption{A graph with labeled darts. \cref{tab:combmap} shows the involution \( \alpha \) of a dart and the permutation \( \sigma \).}\label{fig:combmap}
 \end{figure}
 
-\section{Introduction} % (fold)
+\section{Introduction}% (fold)
 \label{sec:introduction}
 
-\subsection{Lecture} % (fold)
+\subsection{Lecture}% (fold)
 \label{sub:lecture}
 
 I wrote this work for the lecture \emph{Structural Pattern Recognition} in the \emph{WS 2016/17}. The content of the lecture was:
@@ -130,7 +130,7 @@ As my lab exercise in structural pattern recognition I chose the topic ``\emph{C
 
 % subsection lecture (end)
 
-\subsection{Problem Specification} % (fold)
+\subsection{Problem Specification}% (fold)
 \label{sub:problem}
 
 To describe the content of an image it is necessary to extract the objects that an image shows.
@@ -147,7 +147,7 @@ Additionally it enables the application of the graph operations to \emph{contrac
 % subsection problem (end)
 
 \begin{table}[tb]
-  \caption{Involution and permutation of the CM from \cref{fig:combmap}}\label{tab:combmap}
+  \caption{Involution and permutation of the Combinatorial Map (CM) from \cref{fig:combmap}}\label{tab:combmap}
   \centering
 
   \begin{tabular}{lcccc}
@@ -161,7 +161,7 @@ Additionally it enables the application of the graph operations to \emph{contrac
 
 % section introduction (end)
 
-\section{Development methodology} % (fold)
+\section{Development methodology}% (fold)
 \label{sec:development_methodology}
 
 I separated the development process into four phases.
@@ -202,12 +202,12 @@ I separated the development process into four phases.
     \path [line] (next) |- (top);
     \path [line] (top) |- node {no}(next);
 \end{tikzpicture}
-  \caption{The CP creation process}
+  \caption{The CP creation process}%
   \label{fig:cp_creation_process}
 \end{figure}
 
 
-\subsection{Related work} % (fold)
+\subsection{Related work}% (fold)
 \label{sub:related_work}
 
 \begin{figure}[tb]
@@ -216,13 +216,11 @@ I separated the development process into four phases.
   \begin{subfigure}[b]{0.25\textwidth}
         \includegraphics[width=\textwidth]{img/prip1}
         \caption{}\label{fig:prip1}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.25\textwidth}
         \includegraphics[width=\textwidth]{img/prip2}
         \caption{}\label{fig:prip2}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.4\textwidth}
         \includegraphics[width=\textwidth]{img/prip3}
         \caption{}\label{fig:prip3}
@@ -241,8 +239,7 @@ The operations I used in my work are the removal of a dart and the contraction o
 \par
 \cref{fig:combine_remove} shows the creation of a CP with these two operations on a small graph and also the unfolding of the pyramid with the inverse operations. \cref{fig:prip2} shows all darts that can be contracted or removed from the input image \cref{fig:prip1}. \cref{fig:prip3} shows the top of the CP, which is the RAG of the input image.
 \par
-The work from Brun and Kropatsch~\cite{brun2001introduction} is an introduction to the CP\@. It presents background information to the contraction
-kernel of the CP\@. \cref{fig:creationg_of_a_kernel} shows the creation of a contraction kernel. From the neighborhood graph of the input image (\cref{fig:contract_kernel1}) survivor nodes are selected (\cref{fig:contract_kernel2}). A spanning forest is created, so that every node of the original graph can only be reached from one survivor node (\cref{fig:contract_kernel3}). Then every created tree is contracted into the surviving node and these nodes are connected again (\cref{fig:contract_kernel4}). \cref{fig:contract_kernel5,fig:contract_kernel6,fig:contract_kernel7,fig:contract_kernel8} show the same steps again for this created new pyramid level.
+The work from Brun and Kropatsch~\cite{brun2001introduction} is an introduction to the CP\@. It presents background information to the contraction kernel of the CP\@. \cref{fig:creationg_of_a_kernel} shows the creation of a contraction kernel. From the neighborhood graph of the input image (\cref{fig:contract_kernel1}) survivor nodes are selected (\cref{fig:contract_kernel2}). A spanning forest is created, so that every node of the original graph can only be reached from one survivor node (\cref{fig:contract_kernel3}). Then every created tree is contracted into the surviving node and these nodes are connected again (\cref{fig:contract_kernel4}). \cref{fig:contract_kernel5,fig:contract_kernel6,fig:contract_kernel7,fig:contract_kernel8} show the same steps again for this created new pyramid level.
 \par
 
 \begin{figure}[tb]
@@ -250,18 +247,15 @@ kernel of the CP\@. \cref{fig:creationg_of_a_kernel} shows the creation of a con
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel2}
       \caption{}\label{fig:contract_kernel1}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel3}
       \caption{}\label{fig:contract_kernel2}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel4}
       \caption{}\label{fig:contract_kernel3}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel5}
       \caption{}\label{fig:contract_kernel4}
@@ -270,24 +264,21 @@ kernel of the CP\@. \cref{fig:creationg_of_a_kernel} shows the creation of a con
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel6}
       \caption{}\label{fig:contract_kernel5}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel7}
       \caption{}\label{fig:contract_kernel6}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel1}
       \caption{}\label{fig:contract_kernel7}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.2\textwidth}
       \includegraphics[width=\textwidth]{img/contract_kernel8}
       \caption{}\label{fig:contract_kernel8}
   \end{subfigure}
 
-  \caption{The creation of a contraction kernel}
+  \caption{The creation of a contraction kernel}%
   \label{fig:creationg_of_a_kernel}
 \end{figure}
 
@@ -296,13 +287,13 @@ The further work from Brun and Kropatsch~\cite{brun2003contraction} step into de
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.4\textwidth]{img/compar.pdf}
-  \caption{Contracting in parallel is not trivial}
+  \caption{Contracting in parallel is not trivial}%
   \label{fig:parallel}
 \end{figure}
 
 % subsection related_work (end)
 
-\subsection{Python implementation} % (fold)
+\subsection{Python implementation}% (fold)
 \label{sub:python_implementation}
 
 \begin{lstlisting}[caption={how to use the created \texttt{Python} class},label={lst:python},language=Python]
@@ -346,7 +337,7 @@ This helped me to understand the dependencies of the indexing of the darts.
 
 % section development_methodology (end)
 
-\section{Computation of the dart values} % (fold)
+\section{Computation of the dart values}% (fold)
 \label{sec:computation_of_the_dart_values}
 
 A dart in an image is a transition from one pixel to another. In my implementation I used the 4 neighborhood of the pixel for the creation of the image graph.
@@ -361,8 +352,7 @@ So I computed from every pixel the change of the pixel value to every neighbor o
   \begin{subfigure}[b]{0.46\textwidth}
         \includegraphics[width=\textwidth]{img/values_init.jpg}
         \caption{}\label{fig:dart_values_init}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.45\textwidth}
         \includegraphics[width=\textwidth]{img/values_new.jpg}
         \caption{}\label{fig:dart_values_news}
@@ -373,7 +363,7 @@ So I computed from every pixel the change of the pixel value to every neighbor o
 
 % section computation_of_the_dart_values (end)
 
-\section{Construction of the initial CM level} % (fold)
+\section{Construction of the initial CM level}% (fold)
 \label{sec:construction_of_the_initial_cm_level}
 
 I used the \texttt{Python} implementation presented in \cref{sub:python_implementation} to understand the indexing of the darts.
@@ -385,7 +375,7 @@ The following properties of the image need to get calculated to obtain an initia
   \item The previous dart of the dart index \( \rho(x) := \sigma^{-1}(x)  \)
 \end{itemize}
 
-\subsection{Computation of the dart indices} % (fold)
+\subsection{Computation of the dart indices}% (fold)
 \label{sub:computation_of_the_dart_indices}
 
 The indexing of the dart values is motivated by the output from \cref{lst:output_python}. As one can see the next index with the same direction is gained by adding 4, if it is inside the image.
@@ -393,11 +383,11 @@ On the border it is only added by 3, because one dart is missing. Additional sim
 
 % subsection computation_of_the_dart_indices (end)
 
-\subsection{Computation of the next index} % (fold)
+\subsection{Computation of the next index}% (fold)
 \label{sub:computation_of_the_next_index}
 
 \begin{table}[tb]
-  \caption{The permutation \( \sigma \) of a \( 3 \times 3 \) image}
+  \caption{The permutation \( \sigma \) of a \( 3 \times 3 \) image}%
   \label{tab:permutation}
   \centering
 
@@ -413,7 +403,7 @@ On the border it is only added by 3, because one dart is missing. Additional sim
 
 By looking at the permutation of an image a pattern can be observed. \cref{tab:permutation} shows the permutation \( \sigma \) of a \( 3 \times 3 \) image. One can see that for one row within the image the next dart has an image difference of:
 \begin{lstlisting}
-repmat([2; 2; -1; -3], width-2, 1)
+next_darts_one_row = repmat([2; 2; -1; -3], width-2, 1)
 \end{lstlisting}
 Which results in the differences for the whole middle of the image:
 
@@ -427,10 +417,10 @@ Once again special cases occur for the borders of the image.
 
 % subsection computation_of_the_next_index (end)
 
-\subsection{Computation of the other properties} % (fold)
+\subsection{Computation of the other properties}% (fold)
 \label{sub:computation_of_the_other_properties}
 
-The other properties of the image are more easy to calculate:
+The other properties of the image are easier to calculate:
 
 \begin{itemize}
   \item The involution \( \alpha \) for the indices of the darts that point to the north are the indices that point to south (and vice versa).
@@ -451,7 +441,7 @@ cm.prev(cm.next) = 1:num_darts
 
 % section construction_of_the_initial_cm_level (end)
 
-\section{Construction of the pyramid} % (fold)
+\section{Construction of the pyramid}% (fold)
 \label{sec:construction_of_the_pyramid}
 
 \begin{figure}[tb]
@@ -468,7 +458,7 @@ cm.prev(cm.next) = 1:num_darts
 
 After the initial CM is created the map needs to be reduced. The iterative reduction of the CM with the loop described in \cref{fig:creation loop} the CP is created.
 
-\subsection{Compute the contraction kernel} % (fold)
+\subsection{Computation of the contraction kernel}% (fold)
 \label{sub:compute_the_contraction_kernel}
 
 \begin{figure}[tb]
@@ -478,48 +468,46 @@ After the initial CM is created the map needs to be reduced. The iterative reduc
   \begin{subfigure}[b]{0.15\textwidth}
       \includegraphics[width=\textwidth]{img/1}
       \caption{}\label{fig:contraction_kernel_greedy1}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.15\textwidth}
       \includegraphics[width=\textwidth]{img/2}
       \caption{}\label{fig:contraction_kernel_greedy2}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.15\textwidth}
       \includegraphics[width=\textwidth]{img/3}
       \caption{}\label{fig:contraction_kernel_greedy3}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.15\textwidth}
       \includegraphics[width=\textwidth]{img/4}
       \caption{}\label{fig:contraction_kernel_greedy4}
-  \end{subfigure}
-  ~
+  \end{subfigure}~%
   \begin{subfigure}[b]{0.15\textwidth}
       \includegraphics[width=\textwidth]{img/5}
       \caption{}\label{fig:contraction_kernel_greedy5}
   \end{subfigure}
 
-  \caption{(a) Assign next best dart for the contraction kernel (b) Get the involution of the dart and the orbit of the involution (c) now remove the involution of the involution orbit from the set of valid darts (d) now get the orbit of the dart (e) And remove its involution}
+  \caption{(a) Assign next best dart for the contraction kernel (b) Get the involution of the dart and the orbit of the involution (c) now remove the involution of the involution orbit from the set of valid darts (d) now get the orbit of the dart (e) And remove its involution}%
   \label{fig:contraction_kernel_greedy}
 \end{figure}
 
-Initially the darts are sorted by its values. This sorting only needs to be done once for the initial CM\@. For the reduction a contraction kernel needs to be defined (\cref{sub:related_work}). I implemented a greedy algorithm to calculate the kernel.
+Initially the darts are sorted by its values. This sorting only needs to be done once for the initial CM\@. For the reduction a contraction kernel needs to be defined (see \cref{sub:related_work}). I implemented a greedy algorithm to calculate the kernel.
 \par
 \cref{fig:contraction_kernel_greedy} shows the creation of the kernel.
 \begin{itemize}
-  \item First assign next best dart for the contraction kernel (\cref{fig:contraction_kernel_greedy1})
+  \item Initially add all active darts of the CP-level to the set of valid darts.
+  \item First assign the next best dart of all valid darts for the contraction kernel (\cref{fig:contraction_kernel_greedy1})
   \item Then get the involution of the dart and the orbit of the involution (\cref{fig:contraction_kernel_greedy2})
   \item Now remove the involution of the involution orbit from the set of valid darts (\cref{fig:contraction_kernel_greedy3})
   \item Now get the orbit of the dart (\cref{fig:contraction_kernel_greedy4})
-  \item And remove its involution
+  \item And remove its involution from the set of valid darts (\cref{fig:contraction_kernel_greedy5})
   \item Repeat until there are no valid darts left
 \end{itemize}
 
 There are two exceptions for the adding of darts to the contraction kernel:
 \emph{Self loops} and \emph{pending edges}.
 \par
-A self loop is detected by checking if the orbit of the dart is the same as the orbit of the involution of the dart. And the orbit of a pending edge contains only the edge itself.
+A self loop is detected by checking if the orbit of the dart is the same as the orbit of the involution of the dart.
+The orbit of a pending edge contains only the edge itself.
 
 The red darts in \cref{fig:dart_contract} show the contraction kernels for three different images.
 
@@ -528,13 +516,11 @@ The red darts in \cref{fig:dart_contract} show the contraction kernels for three
     \begin{subfigure}[t]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/contract2.jpg}
       \caption{}\label{fig:dart_contract2}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[t]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/contract3.jpg}
       \caption{}\label{fig:dart_contract3}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[t]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/contract1.jpg}
       \caption{}\label{fig:dart_contract1}
@@ -544,7 +530,7 @@ The red darts in \cref{fig:dart_contract} show the contraction kernels for three
 
 % subsection compute_the_contraction_kernel (end)
 
-\subsection{Contraction} % (fold)
+\subsection{Contraction}% (fold)
 \label{sub:contraction}
 
 The contraction of a dart in a CM is calculated with only 4 changes of the CM\@. The next \( \sigma'(\rho(x))\) and previous \( \rho'(\sigma(x))\) dart need to get updated for the dart  \( x \) and its involution \( \alpha(x) \). And  \( x \) and \( \alpha(x) \) are removed from the set of active darts.
@@ -558,13 +544,13 @@ The contraction of a dart in a CM is calculated with only 4 changes of the CM\@.
 
 % subsection contraction (end)
 
-\subsection{Simplification} % (fold)
+\subsection{Simplification}% (fold)
 \label{sub:simplification}
 
 \begin{figure}[tb]
   \centering
   \includegraphics[width=0.6\textwidth]{img/face.pdf}
-  \caption{The number of darts of this face is less than 2 and it can be removed}
+  \caption{The number of darts of this face is less than 2 and it can be removed}%
   \label{fig:faces}
 \end{figure}
 
@@ -603,13 +589,11 @@ If \( x \) is equal to \( \alpha(x) \) a self-direct-loop is detected. The remov
     \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/simply2.jpg}
       \caption{}\label{fig:dart_simply2}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/simply3.jpg}
       \caption{}\label{fig:dart_simply3}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.3\textwidth}
       \includegraphics[width=\textwidth]{img/simply1.jpg}
       \caption{}\label{fig:dart_simply1}
@@ -621,7 +605,7 @@ If \( x \) is equal to \( \alpha(x) \) a self-direct-loop is detected. The remov
 
 % section construction_of_the_pyramid (end)
 
-\section{Results} % (fold)
+\section{Results}% (fold)
 \label{sec:results}
 
 \begin{figure}[tb]
@@ -630,39 +614,39 @@ If \( x \) is equal to \( \alpha(x) \) a self-direct-loop is detected. The remov
     \begin{subfigure}[b]{0.4\textwidth}
       \includegraphics[width=\textwidth]{img/result.jpg}
       \caption{}\label{fig:result1}
-    \end{subfigure}
-    ~
+    \end{subfigure}~%
     \begin{subfigure}[b]{0.4\textwidth}
       \includegraphics[width=\textwidth]{img/result2.jpg}
       \caption{}\label{fig:result2}
     \end{subfigure}
-  \caption{The two test images. The shown darts are the darts of the top pyramid level.}\label{fig:result}
+  \caption{Two test images. The shown darts are the darts of the top pyramid level.}\label{fig:result}
 \end{figure}
 
-\subsection{Performance} % (fold)
+\subsection{Performance}% (fold)
 \label{sub:performance}
 
 \begin{table}[tb]
-  \caption{caption here}
-  \label{tab:tablename}
+  \caption{The performance of the application for two input images}%
+  \label{tab:performance}
   \centering
 
-  \begin{tabular}{lcc}
+  \begin{tabular}{lp{0.15\textwidth}p{0.2\textwidth}p{0.2\textwidth}p{0.1\textwidth}}
   \toprule
-  \textbf{Image} & \textbf{initial CM} & \textbf{Contraction\\ level 1} & \textbf{Simplification\\ level 1} & \textbf{Total}\\
-    \cref{fig:result1} & 0.05 & & &\\
-    \cref{fig:result2} & & & &\\
+  \textbf{Image} & \textbf{initial CM} & \textbf{Contraction level 1} & \textbf{Simplification level 1} & \textbf{Total}\\
+  \midrule
+    \cref{fig:result1} & \( 0.04s \) & \( 4.73s \) & \( 99.64s \) & \( 114.20s \) \\
+    \cref{fig:result2} & \( 0.03s \) & \( 3.38s \) & \( 73.44s \) & \( 89.12s \) \\
   \bottomrule
   \end{tabular}
 \end{table}
 
-The implementation was tested on a  Processor Intel(R) Core(TM) i7-3770K CPU @ 3.50GHz, 3501 Mhz, 4 Core(s), 8 Logical Processor(s) with installed 16,0 GB physical memory (RAM).
+The implementation was tested on a  Processor Intel (R) Core (TM) i7--3770K CPU @ 3.50GHz, 3501 Mhz, 4 Core (s), 8 Logical Processor (s) with installed 16,0 GB physical memory (RAM).
 
-The bottle neck of the implementation was the simplification process. Which took for the two.
+The \cref{tab:performance} shows the computation time of the proposed algorithm. It can be observed that the bottle neck of the implementation is the simplification process.
 
 % subsection performance (end)
 
-\subsection{Publication} % (fold)
+\subsection{Publication}% (fold)
 \label{sub:publication}
 
 I published my work on the platform \texttt{Github}\cite{github}. The repository is called: \url{https://github.com/theShmoo/CombiPyr-ImSeg} and it contains:
@@ -677,6 +661,17 @@ I published my work on the platform \texttt{Github}\cite{github}. The repository
 
 
 % section results (end)
+
+\section{Discussion and Conclusion}% (fold)
+\label{sec:discussion}
+
+The proposed algorithm creates a CP, which can be used to extract the RAG of an image.
+A simple use case would be to implement an image segmentation algorithm with the CP\@.
+\par
+To create the segmentation you only need one pixel value at the top dart of the pyramid.
+The dart values of the contraction kernels represent the changes of this pixel value to the underlying pyramid levels.
+
+% section discussion (end)
 
 %-----------------------------------------------------------------------------
 \bibliographystyle{abbrv}

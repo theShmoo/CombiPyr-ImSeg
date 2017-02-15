@@ -8,16 +8,4 @@
 
 24.11.2016
 
-## Abstract
-
-Todo
-
-## Example
-
-Todo
-
-## Documentation
-
-Todo
-
-
+See the documentation in doc/summary
